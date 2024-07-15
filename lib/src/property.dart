@@ -29,6 +29,8 @@ class Property<T extends Object> {
   }
 }
 
+/// Creates a property by appending property after a value.
+/// This is a shorter way for creating a property.
 extension PropertyExtension<T extends Object> on T {
   Property<T> get property => Property<T>(this);
 }

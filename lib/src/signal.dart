@@ -26,12 +26,12 @@ class Signal {
   }
 }
 
-/// free floating connect function for qt like usage.
+/// free floating connect function.
 void connect(Signal signal, Function slot) {
   signal._slots.add(slot);
 }
 
-/// free floating disconnect function for qt like usage.
+/// free floating disconnect function.
 void disconnect(Signal signal, Function slot) {
   signal._slots.remove(slot);
 }

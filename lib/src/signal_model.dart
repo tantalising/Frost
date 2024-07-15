@@ -4,7 +4,9 @@
 /// The init and dispose must be called manually by the user at the appropriate
 /// times. See [ModelStore] for an easy way of using these methods.
 abstract class SignalModel {
+  /// Does some work when the model is added to the [ModelStore].
   void init() {}
+  /// Cleans up when the model is removed from the [ModelStore].
   void dispose() {}
 }
 
