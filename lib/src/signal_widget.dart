@@ -6,7 +6,6 @@ class SignalWidget<T extends SignalModel> extends StatefulWidget {
   final Widget Function() builder;
   final Set<Signal>? signals;
   final Signal? signal;
-  final T? model;
   final VoidCallback? onInit;
   final VoidCallback? onDispose;
 
@@ -15,16 +14,16 @@ class SignalWidget<T extends SignalModel> extends StatefulWidget {
     this.signals,
     required this.builder,
     this.signal,
-    this.model,
+    T? model,
     this.onInit,
     this.onDispose,
   }) {
     if (model != null) {
-      ModelStore.add<T>(model!);
+      ModelStore.add<T>(model);
     }
   }
 
-  void _removeThisModel() {
+  void _removeModelFromStore() {
     ModelStore.remove<T>();
   }
 
@@ -53,14 +52,15 @@ class _SignalWidgetState extends State<SignalWidget> {
   @override
   void dispose() {
     widget.signal?.disconnect(_rebuild);
+
     final signals = widget.signals ?? {};
     for (final signal in signals) {
       signal.disconnect(_rebuild);
     }
+    
     widget.onDispose?.call();
-    if (widget.model != null) {
-      widget._removeThisModel();
-    }
+    widget._removeModelFromStore();
+
     super.dispose();
   }
 
