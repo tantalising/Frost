@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'property.dart';
 
 /// An Widget that accepts an property and automatically rebuilds
-/// when the property is changed via [Property.set] or [Property.update]
-/// function or the [Property.changed] signal is emitted by user.
+/// when the property is changed by setting [Property.value] or
+/// calling [Property.update] function or the [Property.changed]
+/// signal is emitted by user.
 /// The type is used to verify that the property supplied indeed is
 /// the right one. Since multiple properties can have different types,
 /// there's no need to specify type in that case.

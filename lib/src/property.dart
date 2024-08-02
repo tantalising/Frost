@@ -5,7 +5,7 @@ import 'signal.dart';
 /// The property is useful when the model of the widget is too small.
 /// In that case creating a property will be shorter.
 /// Property contains a [Property.changed] signal which is emitted
-/// automatically after calling [Property.set] or [Property.update].
+/// automatically after setting [Property.value] or [Property.update].
 /// It is best to use this in combination with [PropertyWidget].
 class Property<T extends Object> {
   late T _value;
