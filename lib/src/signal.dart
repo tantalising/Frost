@@ -1,3 +1,5 @@
+import 'slot_store.dart';
+
 /// Helps visually distinguishing between slots and other methods.
 /// Not necessary to use but helpful for void slots.
 /// Slots must be a function with at most one argument.
@@ -5,16 +7,16 @@ typedef Slot = void;
 
 /// The Signal class offering all the signal features.
 class Signal {
-  final Set<Function> _slots = {};
+  final _slotSet = SlotStore();
 
   /// in built connect function for object flavoured usage.
   void connect(Function slot) {
-    _slots.add(slot);
+    _connect(this, slot);
   }
 
   /// in built disconnect function for object flavoured usage.
   void disconnect(Function slot) {
-    _slots.remove(slot);
+    _disconnect(this, slot);
   }
 
   /// Calls the slots connected with this signal.
@@ -26,14 +28,16 @@ class Signal {
   }
 }
 
+const _connect = connect;
 /// free floating connect function.
 void connect(Signal signal, Function slot) {
-  signal._slots.add(slot);
+  signal._slotSet.add(slot);
 }
 
+const _disconnect = disconnect;
 /// free floating disconnect function.
 void disconnect(Signal signal, Function slot) {
-  signal._slots.remove(slot);
+  signal._slotSet.remove(slot);
 }
 
 /*----------------------- private -------------------------------*/
@@ -58,7 +62,7 @@ void _emit<T>(Signal signal, [T? argument]) {
 }
 
 void _callSlots(Signal signal) {
-  for (final slot in signal._slots) {
+  for (final slot in signal._slotSet.slots()) {
     try {
       slot();
     } on NoSuchMethodError {
@@ -68,7 +72,7 @@ void _callSlots(Signal signal) {
 }
 
 void _callSlotsWithArgument<T>(Signal signal, T argument) {
-  for (final slot in signal._slots) {
+  for (final slot in signal._slotSet.slots()) {
     try {
       slot(argument);
     } on NoSuchMethodError {
@@ -80,3 +84,4 @@ void _callSlotsWithArgument<T>(Signal signal, T argument) {
     }
   }
 }
+
