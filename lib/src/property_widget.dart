@@ -5,6 +5,7 @@ import 'property.dart';
 /// when the property is changed by setting [Property.value] or
 /// calling [Property.update] function or the [Property.changed]
 /// signal is emitted by user.
+///
 /// The type is used to verify that the property supplied indeed is
 /// the right one. Since multiple properties can have different types,
 /// there's no need to specify type in that case.
