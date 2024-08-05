@@ -61,14 +61,20 @@ class PropertyWidget<T extends Object> extends StatefulWidget {
   /// The builder for the widget that uses the property.
   final Widget Function() builder;
 
-  /// The property that the builder uses.
+  /// The property that the builder uses. Use when connecting only one property.
   final Property<T>? property;
 
   /// Field for connecting to multiple properties.
   final Set<Property>? properties;
 
+  /// A callback which does some work when the widget is created.
+  final VoidCallback? onInit;
+
+  /// A callback which does some work when the widget is disposed.
+  final VoidCallback? onDispose;
+
   const PropertyWidget(
-      {super.key, this.property, this.properties, required this.builder});
+      {super.key, this.property, this.properties, required this.builder, this.onInit, this.onDispose});
   @override
   State<PropertyWidget> createState() => _PropertyWidgetState();
 }
@@ -80,6 +86,7 @@ class _PropertyWidgetState extends State<PropertyWidget> {
     widget.properties?.forEach((property) {
       property.changed.connect(setState);
     });
+    widget.onInit?.call();
     super.initState();
   }
 
@@ -89,6 +96,7 @@ class _PropertyWidgetState extends State<PropertyWidget> {
     widget.properties?.forEach((property) {
       property.changed.disconnect(setState);
     });
+    widget.onDispose?.call();
     super.dispose();
   }
 
@@ -97,4 +105,3 @@ class _PropertyWidgetState extends State<PropertyWidget> {
     return widget.builder();
   }
 }
-// todo: expose onInit and onDispose
