@@ -9,6 +9,13 @@ import 'signal.dart';
 /// It is best to use this in combination with [PropertyWidget].
 class Property<T extends Object> {
   late T _value;
+  /// This signal is emitted when the property is changed.
+  /// Generally not intended to be used directly.
+  /// If it is required to do something when the property changes,
+  /// connect to this signal an appropriate slot.
+  /// Don't forget to disconnect the slot when not needed anymore.
+  ///
+  /// See the [PropertyWidget] for usage examples.
   final changed = Signal();
   Property(T value) {
     _value = value;

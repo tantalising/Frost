@@ -6,8 +6,8 @@ import 'dart:collection';
 /// The add and remove methods keep a list of slots to be added or removed and
 /// does not really add them to the set or remove them from the set until the
 /// [SlotStore.sync] method is called. It facilitates mutating the set while
-/// or other slots iterating over it. The intended use case is slots removing
-/// or adding itself in a signal emission. Since the underlying set is hidden,
+/// iterating over it. The intended use case is slots removing or adding
+/// itself or other slots in a signal emission. Since the underlying set is hidden,
 /// a readonly iterator of the set is provided by the [SlotStore.slots] method.
 class SlotStore {
   final HashSet<Function> _slots = HashSet();

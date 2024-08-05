@@ -1,14 +1,62 @@
 import 'package:flutter/material.dart';
 import 'property.dart';
 
-/// An Widget that accepts an property and automatically rebuilds
+/// An Widget that accepts a property and automatically rebuilds
 /// when the property is changed by setting [Property.value] or
-/// calling [Property.update] function or the [Property.changed]
-/// signal is emitted by user.
+/// calling [Property.update] method or the [Property.changed]
+/// signal is emitted by the user.
 ///
 /// The type is used to verify that the property supplied indeed is
 /// the right one. Since multiple properties can have different types,
 /// there's no need to specify type in that case.
+///
+/// Let us assume you need a property for a count. You can create the
+/// property in the following way:
+/// ```dart
+/// final _count = 0.property; //private globals are fine.
+/// final _count = Property<int>(0); // this works as well but ugly.
+/// ```
+/// Now to create a widget that shows this count and also updates
+/// when the count changes, you can use the PropertyWidget:
+/// ```dart
+///      PropertyWidget(
+///          property: _count,
+///          builder: () => Text(
+///          _count.value.toString(),
+///          style: Theme.of(context).textTheme.headlineMedium,
+///          ),
+///         ),
+/// ```
+/// Let us assume you have a class like this:
+/// ```dart
+///   class Count {
+///     Count(this.count);
+///     int count;
+///   }
+/// ```
+///
+///Create a property out of this class like this:
+///```dart
+/// final _count = Count(0).property;
+///```
+///You can update the property like this:
+///```dart
+/// _count.value = Count(1);
+///```
+///Though this works we don't want to create a new object here.
+///This would have been fine if count was made of an int like this:
+///```dart
+/// final _count = 0.property;
+/// //update like this;
+/// _count.value = 2;
+///```
+///To change the interior of the value that is stored in the property
+///use the [Property.update] method.
+///```dart
+/// _count.update((value) { value.count = 2 });
+///```
+/// If you just update the value directly, the property widget
+/// won't update the ui unless you emit the [Property.changed] signal as well.
 class PropertyWidget<T extends Object> extends StatefulWidget {
   /// The builder for the widget that uses the property.
   final Widget Function() builder;
@@ -49,3 +97,4 @@ class _PropertyWidgetState extends State<PropertyWidget> {
     return widget.builder();
   }
 }
+// todo: expose onInit and onDispose

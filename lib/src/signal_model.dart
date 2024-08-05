@@ -1,8 +1,11 @@
 /// Interface for models intended to be used with signal mechanism.
 ///
 /// It is recommended to implement or inherit from this class for easier usage of signals.
-/// The init and dispose must be called manually by the user at the appropriate
-/// times. See [ModelStore] for an easy way of using these methods.
+/// The [SignalModel.init] and [SignalModel.dispose] must be called manually by the user at appropriate
+/// times, if it is not being used with a [SignalWidget]. You can as well use the
+/// [ModelStore] to store, update, access and remove your models. In this case init and dispose
+/// will be called automatically when [ModelStore.add] and [ModelStore.remove] is used.
+/// See [ModelStore] for more details.
 abstract class SignalModel {
   /// Does some work when the model is added to the [ModelStore].
   void init() {}
@@ -18,11 +21,11 @@ abstract class SignalModel {
 /// is added to this store.
 /// Similarly dispose method of [SignalModel] is called when a model is
 /// removed from the store.
-///
-/// You cannot add two instances of same model in the store.
-/// There's other dedicated packages for this purpose with more features.
-/// This is intended to be a simple solution for basic usage.
-/// Feel free to use other packages which are appropriate for your needs.
+/// You cannot add two instances of same model in the store. It will not
+/// update the underlying model even if you add twice.
+/// You can replace an instance of a model with another one using the
+/// [ModelStore.replace] method.
+
 abstract class ModelStore {
   static final _modelRepository = <Type, SignalModel>{};
 

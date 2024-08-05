@@ -1,7 +1,136 @@
-Flutter signal is a library that provides signal and slot mechanism similar to qt and qml.
-Signals are used to, well, signal that something has changed. The slots connected to the signal are
-then called in response. It is a communication medium for entities wanting to communicate with 
-each other.
+# Signal
+Flutter signal provides a mechanism for communication between two entities. It is primarily
+meant to be used as a state management solution. Although Signal is a simple and powerful way for
+managing states, it can do more than that!
+
+## Introduction
+Let's assume a class Person with an age attribute want to notify when its age change. This is how
+The class look:
+```dart
+class Person {
+  Person(this._age);
+  int _age;
+  int get age => _age;
+  set age(int newAge) => _age = newAge;
+}
+
+```
+We are going to create a _signal_ that will notify other interested entities about the change.
+
+```dart
+class Person {
+  static final ageChanged = Signal(); // <-- here. static for ease of use.
+  Person(this._age);
+  int _age;
+  int get age => _age;
+  set age(int newAge) => _age = newAge;
+}
+
+```
+Now we need to _emit_ the signal whenever the age changes.
+
+```dart
+class Person {
+  static final ageChanged = Signal();
+  Person(this._age);
+  int _age;
+  int get age => _age;
+  set age(int newAge) {
+    _age = newAge;
+    ageChanged(); // <-- signal emitted;
+  }
+}
+```
+Let's create a class AgePrinter that prints "Age changed" whenever the age changes.
+We will create a method that will print the required string. Methods or functions which
+are invoked in response to a signal are called _slot_. There's nothing special about them.
+They are just regular functions which serves a specific purpose(Here responding to a signal).
+Here's how the class looks:
+
+```dart
+class AgePrinter {
+  Slot printUpdateMessage() {
+    print("Age Updated");
+  }
+}
+```
+> Note:
+> _Slot_ is just a typedef for void. 
+> It is used to highlight that the method is intended to be used as a slot.
+
+We need to _connect_ the signal to our slot to make this work.
+
+```dart
+  void main() {
+    final person = Person(30);
+    final printer = AgePrinter();
+
+    Person.ageChanged.connect(printer.printUpdateMessage);
+    //connect(Person.ageChanged, printer.printUpdateMessage); <- or like this as well
+    person.age = 12;
+  }
+```
+This will print "Age Updated" when run. 
+This is good but doesn't print the age of the person. In order to do so, we need to pass the
+age with the signal.
+
+```dart
+class Person {
+  static final ageChanged = Signal();
+  Person(this._age);
+  int _age;
+  int get age => _age;
+  set age(int newAge) {
+    _age = newAge;
+    ageChanged(newAge); // <-- passing the age here;
+  }
+}
+```
+To print the age passed by signal, we need to update the slot syntax as well. We are going to take
+the age as a parameter in the slot.
+
+```dart
+class AgePrinter {
+  Slot printUpdateMessage(int age) {
+    print("Age Updated. New age is $age");
+  }
+}
+```
+
+Running the code now would print "Age updated. New age is 12". 
+
+It is necessary to _disconnect_ the slot when no longer needed in order to avoid undesired
+calls to slots or calls to non-existent slots.
+
+We can disconnect using a similar syntax. Just replace the connect with disconnect.
+Let's assume we don't want to print the message if the last printed age is 100. 
+
+```dart
+class AgePrinter {
+  Slot printUpdateMessage(int age) {
+    print("Age Updated. New age is $age");
+    if(age == 100) {
+      Person.ageChanged.disconnect(printUpdateMessage); //<-- disconnect here
+      //disconnect(Person.ageChanged, printUpdateMessage); <-- or like this
+    }
+  }
+}
+
+  void main() {
+    final person = Person(30);
+    final printer = AgePrinter();
+
+    Person.ageChanged.connect(printer.printUpdateMessage);
+    person.age = 19;
+    person.age = 99;
+    person.age = 100;
+    person.age = 12;
+  }
+```
+As you can see, running the code won't print the new age after the age has become 100 once.
+
+
+
 
 ## Features
 

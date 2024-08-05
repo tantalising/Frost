@@ -30,13 +30,15 @@ class Signal {
 }
 
 const _connect = connect;
-/// free floating connect function.
+/// free floating connect function. Use it to connect a signal
+/// to a slot.
 void connect(Signal signal, Function slot) {
   signal._slotSet.add(slot);
 }
 
 const _disconnect = disconnect;
-/// free floating disconnect function.
+/// free floating disconnect function. Use to disconnect a signal
+/// from a slot.
 void disconnect(Signal signal, Function slot) {
   signal._slotSet.remove(slot);
 }
@@ -78,7 +80,7 @@ void _callSlotsWithArgument<T>(Signal signal, T argument) {
       slot(argument);
     } on NoSuchMethodError {
       try {
-        slot();
+        slot(); // In case the user chose to ignore the argument. Signal passes an argument but this particular slot doesn't need it.
       } on NoSuchMethodError {
         assert(_signalSignature == _slotSignature, _signalSlotMismatchErrorMessage);
       }
