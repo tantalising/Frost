@@ -1,9 +1,120 @@
 # Signal
 Flutter signal provides a mechanism for communication between two entities. It is primarily
 meant to be used as a state management solution. Although Signal is a simple and powerful way for
-managing states, it is not limited to state management only. 
+managing states, it is not limited to state management only. See the [Getting Started][#getting-started]
+for a quick introduction. Do check out the [Detailed Introduction][#detailed-introduction] for advanced
+usage and deeper understanding.
 
-## Introduction
+## Getting started
+
+Use [SignalModel] to create the data for your app. We will create a counter app.
+
+```dart
+class CountModel extends SignalModel {
+     void incrementCount() {
+       _counter++;
+     }
+     int get count => _counter;
+     int _counter = 0;
+}
+```
+
+Use [Signal] for notifying the ui about data changes so that it can update itself.
+Emit the signal when data changes.
+
+```dart
+class CountModel extends SignalModel {
+     static final countChanged = Signal();
+
+     void incrementCount() {
+       _counter++;
+       countChanged(); // <- notify about change.
+     }
+     int get count => _counter;
+     int _counter = 0;
+}
+```
+
+Use [SignalWidget] for updating your ui when the data changes.
+Fetch your model using [ModelStore.get] method which returns
+a model of the given type or null if none found.
+
+```dart
+    SignalWidget(
+      signal: CountModel.countChanged,
+      model: CountModel(),
+      builder: () => Text(
+      ModelStore.get<CountModel>()!.count.toString(),
+      ),
+    ),
+```
+Consider using a model accessor in the model class for shorter access of models.
+```dart
+class CountModel extends SignalModel {
+     static final countChanged = Signal();
+
+    //model Accessor
+     static CountModel get get {
+       final model = ModelStore.get<CountModel>();
+       if(model == null) {
+         throw("CountModel not found");
+       }
+       return model;
+     }
+
+     void incrementCount() {
+       _counter++;
+       countChanged();
+     }
+     int get count => _counter;
+     int _counter = 0;
+}
+```
+
+Now use it as follows:
+
+```dart
+      SignalWidget(
+        signal: CountModel.countChanged,
+        model: CountModel(),
+        builder: () => Text(
+        CountModel.get.count.toString(),
+        ),
+      ),
+```
+Since the data is too small we can use [Property] to create our model.
+
+```dart
+final _count = 0.property;
+// final _count = Property(0); or like this as well.
+```
+
+Use [PropertyWidget] for using this property in your app.
+
+```dart
+    PropertyWidget(
+      property: _count,
+      builder: () => Text(
+        _count.value.toString(),
+        style: Theme.of(context).textTheme.headlineMedium,
+      ),
+    ),
+```
+Change the property value like this:
+
+```dart
+_count.value = 3;
+```
+For mutating the interior of more complex objects, use the [Property.update] method.
+
+```dart
+// make other changes outside. Just write the final value like this or even 
+// pass an empty value if needed. The ui won't update without calling update
+// if you just make changes to the underlying property value.
+_count.update((value) { value.count = 2 });
+```
+
+## Detailed Introduction
 Let's assume a class Person with an age attribute want to notify when its age change. This is how
 The class look:
 ```dart
@@ -129,28 +240,3 @@ class AgePrinter {
 ```
 As you can see, running the code won't print the new age after the age has become 100 once.
 
-
-
-
-## Features
-
-
-## Getting started
-
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
-
-## Usage
-
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder.
-
-```dart
-const like = 'sample';
-```
-
-## Additional information
-
-TODO: Tell users more about the package: where to find more information, how to
-contribute to the package, how to file issues, what response they can expect
-from the package authors, and more.
