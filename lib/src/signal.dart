@@ -1,4 +1,51 @@
 import 'slot_store.dart';
+/// Signals help you to establish connections between two entities.
+///
+/// It is essentially a communication mechanism.
+/// When an entity wants to notify others about something, it creates an
+/// _signal_ and _emit_ it. It doesn't care about who wants to listen to the
+/// signal. The interested parties will _connect_ to the signal instead.
+/// They will _disconnect_ from the signal when there's no more need to listen
+/// to it.
+///
+/// Let us create a class that will _emit_ signals for others to connect to.
+/// ```dart
+///  class SignalEmitter {
+///     final somethingHappened = Signal();
+///  }
+/// ```
+///
+/// Let's create another class that is interested in listening to the signal
+/// we just created.
+/// ```dart
+///class SignalReceiver {
+///   Slot handleSomethingHappened() {
+///     print("something happened.");
+///   }
+///   ```
+///> Note:
+///> _Slot_ is just a typedef for void.
+///> It is used to highlight that the method is intended to be used as a slot.
+///
+/// Connect the slot to the signal to get notified about signal emission.
+/// ```dart
+///   signalEmitter.somethingHappened.connect(signalReceiver.handleSomethingHappened);
+///   //connect(signalEmitter.somethingHappened, signalReceiver.handleSomethingHappened); <- or like this
+///```
+///
+/// Now we will _emit_ the signal to notify others.
+/// ```dart
+/// signalEmitter.somethingHappened();
+/// ```
+/// Running the code would print "something happened."
+///
+/// Disconnect the slot from the signal when it is no more needed.
+///
+/// ```dart
+///   signalEmitter.somethingHappened.disconnect(signalReceiver.handleSomethingHappened);
+///   //disconnect(signalEmitter.somethingHappened, signalReceiver.handleSomethingHappened); <- or like this
+///```
+
 
 /// Helps visually distinguishing between slots and other methods.
 /// Not necessary to use but helpful for void slots.

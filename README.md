@@ -1,7 +1,7 @@
 # Signal
 Flutter signal provides a mechanism for communication between two entities. It is primarily
 meant to be used as a state management solution. Although Signal is a simple and powerful way for
-managing states, it can do more than that!
+managing states, it is not limited to state management only. 
 
 ## Introduction
 Let's assume a class Person with an age attribute want to notify when its age change. This is how
