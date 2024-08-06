@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_signal/signal_model.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_signal/signal.dart';
-
 import 'pages_for_testing_widgets/signal_widget_test.dart';
 
 

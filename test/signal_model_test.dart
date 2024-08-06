@@ -1,5 +1,6 @@
+import 'package:flutter_signal/signal_model.dart';
 import 'package:test/test.dart';
-import 'package:flutter_signal/signal.dart';
+
 
 class MyModel implements SignalModel {
   bool initCalled = false;

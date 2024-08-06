@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_signal/signal.dart';
+import 'package:flutter_signal/signal_model.dart';
+import 'package:flutter_signal/signal_widget.dart';
 
 bool disposeCalled = false; // global so that it doesn't go away with the
 // model when the widget is disposed. SignalWidget disposes models passed to
