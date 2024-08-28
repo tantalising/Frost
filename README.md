@@ -7,6 +7,7 @@ usage and deeper understanding.
 
 ## Getting started
 
+### Signal Model
 Use [SignalModel] to create the data for your app. We will create a counter app.
 
 ```dart
@@ -18,23 +19,23 @@ class CountModel extends SignalModel {
      int _counter = 0;
 }
 ```
-
+### Signal
 Use [Signal] for notifying the ui about data changes so that it can update itself.
-Emit the signal when data changes.
+Emit the signal when data in model changes.
 
 ```dart
 class CountModel extends SignalModel {
-     static final countChanged = Signal();
+     static final countChanged = Signal(); // <-- create a signal
 
      void incrementCount() {
        _counter++;
-       countChanged(); // <- notify about change.
+       countChanged(); // <-- notify about change.
      }
      int get count => _counter;
      int _counter = 0;
 }
 ```
-
+### Signal Widget
 Use [SignalWidget] for updating your ui when the data changes.
 Fetch your model using [ModelStore.get] method which returns
 a model of the given type or null if none found.
@@ -42,12 +43,13 @@ a model of the given type or null if none found.
 ```dart
     SignalWidget(
       signal: CountModel.countChanged,
-      model: CountModel(),
+      model: ()=>CountModel(), // <-- provide the model so that we can get it using model store
       builder: () => Text(
       ModelStore.get<CountModel>()!.count.toString(),
       ),
     ),
 ```
+### Model Accessor
 Consider using a model accessor in the model class for shorter access of models.
 ```dart
 class CountModel extends SignalModel {
@@ -76,12 +78,14 @@ Now use it as follows:
 ```dart
       SignalWidget(
         signal: CountModel.countChanged,
-        model: CountModel(),
+        model:()=>CountModel(),
         builder: () => Text(
         CountModel.get.count.toString(),
         ),
       ),
 ```
+
+### Property Widget
 Since the data is too small we can use [Property] to create our model.
 
 ```dart
@@ -115,8 +119,8 @@ _count.update((value) { value.count = 2 });
 ```
 
 ## Detailed Introduction
-Let's assume a class Person with an age attribute want to notify when its age change. This is how
-The class look:
+Let's assume a class Person with an age attribute wants to notify when its age changes. This is how
+the class look:
 ```dart
 class Person {
   Person(this._age);
@@ -235,8 +239,92 @@ class AgePrinter {
     person.age = 19;
     person.age = 99;
     person.age = 100;
-    person.age = 12;
+    person.age = 12; // <-- no response for this code
   }
 ```
 As you can see, running the code won't print the new age after the age has become 100 once.
+
+We are now going to use the signal for state management purpose. Let's revisit the counter app
+with StatefulWidget approach.
+
+```dart
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Flutter Demo',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
+      ),
+      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+    );
+  }
+}
+
+class MyHomePage extends StatefulWidget {
+  const MyHomePage({super.key, required this.title});
+  final String title;
+
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  int _counter = 0;
+
+  void _incrementCounter() {
+    setState(() {
+      _counter++;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: Text(widget.title),
+      ),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            const Text(
+              'You have pushed the button this many times:',
+            ),
+            Text(
+              '$_counter',
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _incrementCounter,
+        tooltip: 'Increment',
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+}
+```
+
+We can see the problem here. There's no reason to include the floating action button inside the
+StatefulWidget. Actually the only thing we need is the Text widget. But to access the setState
+function the floating action button has to be included inside the stateful widget. It's hard to
+modify state of a StatefulWidget from outside. We are going to improve this using signals. First
+we will create a model for our app. The model class will hold the necessary data that will be used in the app.
+
+
+
+
 

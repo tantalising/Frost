@@ -93,7 +93,7 @@ void disconnect(Signal signal, Function slot) {
 /*----------------------- private -------------------------------*/
 
 const _signalSlotMismatchErrorMessage =
-    'signal: Slot must be a function'
+    'flutter_signal: Slot must be a function'
     'with zero or one argument. Argument'
     'should be provided if expected by slot.';
 

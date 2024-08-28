@@ -6,7 +6,8 @@
 /// [ModelStore] to store, update, access and remove your models. In this case init and dispose
 /// will be called automatically when [ModelStore.add] and [ModelStore.remove] is used.
 /// See [ModelStore] for more details.
-abstract class SignalModel {
+ abstract class SignalModel {
+  SignalModel();
   /// Does some work when the model is added to the [ModelStore].
   void init() {}
   /// Cleans up when the model is removed from the [ModelStore].
@@ -26,30 +27,39 @@ abstract class SignalModel {
 /// You can replace an instance of a model with another one using the
 /// [ModelStore.replace] method.
 
+// The class ModelStore is lazy and does not really add any model
+// until that particular model is requested. It helps in cases
+// where user wants to initialize models in bulk and use them
+// later or may not even use them. In this way it potentially saves resources.
+typedef ModelBuilder<T extends SignalModel> = T Function();
 abstract class ModelStore {
-  static final _modelRepository = <Type, SignalModel>{};
+  static final _modelBuilderRepository = <Type, ModelBuilder>{};
 
   /// Adds a model to the Store.
   /// No model is added if a model of same type already exists.
-  static void add<T extends SignalModel>(T model) {
-    if (_modelRepository.containsKey(T)) return;
-    model.init();
-    _modelRepository[T] = model;
+  static void add<T extends SignalModel>(ModelBuilder<T> modelBuilder) {
+    _modelBuilderRepository[T] = modelBuilder;
   }
 
   /// Removes the model of given type from the store and returns it.
   /// It also calls the dispose method of the model.
   /// Returns null if no model is found.
   static T? remove<T extends SignalModel>() {
-   final T? model = _modelRepository.remove(T) as T?;
-   model?.dispose();
-   return model;
+    _modelBuilderRepository.remove(T);
+    return _ModelStore.remove<T>();
   }
 
   /// Returns the model of given type from the store.
   /// Returns null if no such model exists.
-  static T? get<T extends SignalModel>() {
-    final T? model = _modelRepository[T] as T?;
+  static T? get<T extends SignalModel>() { //fixme: refactor for better understanding
+    var model = _ModelStore.get<T>();
+    if (model == null) {
+      final builder = _modelBuilderRepository[T];
+      if (builder != null) {
+         model = builder() as T?;
+        _ModelStore.add<T>(model as T);
+      }
+    }
     return model;
   }
 
@@ -59,12 +69,44 @@ abstract class ModelStore {
   /// Note that [ModelStore.add] doesn't replace a model if it already exists.
   /// Instead it silently ignores the request. So use this method for replacing
   /// an entire model.
+  static void replace<T extends SignalModel>(ModelBuilder<T> builder) { //fixme: refactor for better understanding
+    _modelBuilderRepository.remove(T);
+    _modelBuilderRepository[T] = builder;
+    _ModelStore.replace(builder());
+  }
+
+  /// Removes all the models from the store.
+  static void clear() {
+    _modelBuilderRepository.clear();
+    _ModelStore.clear();
+  }
+}
+
+abstract class _ModelStore {
+  static final _modelRepository = <Type, SignalModel>{};
+
+  static void add<T extends SignalModel>(T model) {
+    if (_modelRepository.containsKey(T)) return;
+    model.init();
+    _modelRepository[T] = model;
+  }
+
+  static T? remove<T extends SignalModel>() {
+   final T? model = _modelRepository.remove(T) as T?;
+   model?.dispose();
+   return model;
+  }
+
+  static T? get<T extends SignalModel>() {
+    final T? model = _modelRepository[T] as T?;
+    return model;
+  }
+
   static void replace<T extends SignalModel>(T model) {
     remove<T>();
     add<T>(model);
   }
 
-  /// Removes all the models from the store.
   static void clear() {
     _modelRepository.clear();
   }

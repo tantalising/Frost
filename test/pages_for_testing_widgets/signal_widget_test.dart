@@ -106,7 +106,7 @@ class MyHomePage extends StatelessWidget {
               onDispose: () => disposeCalled = true,
 
               signal: CountModel.countChanged,
-              model: CountModel(),
+              model: () => CountModel(),
 
               builder: () => Text(
                 CountModel.get.count.toString(),

@@ -30,35 +30,38 @@ void main() {
 
 void testAddModel() {
   final myModel = MyModel();
-  ModelStore.add(myModel);
+  ModelStore.add(() => myModel);
   expect(myModel, ModelStore.get<MyModel>());
 }
 
 void testGetModel() {
-  ModelStore.add(MyModel());
+  ModelStore.add(()=>MyModel());
   expect(ModelStore.get<MyModel>(), isNot(null));
 }
 
 void testRemoveModel() {
-  ModelStore.add(MyModel());
+  ModelStore.add(()=>MyModel());
+  ModelStore.get<MyModel>(); // needed since addition is lazy.
   expect(ModelStore.remove<MyModel>(), isNot(null));
 }
 
 void testReplaceModel() {
-  ModelStore.add(MyModel());
-  ModelStore.replace(MyModel()..replaced=true);
+  ModelStore.add(()=>MyModel());
+  ModelStore.replace(()=>MyModel()..replaced=true);
   expect(ModelStore.get<MyModel>()!.replaced, true);
 }
 
 void testInitOnAdd() {
   final myModel = MyModel();
-  ModelStore.add(myModel);
+  ModelStore.add(()=>myModel);
+  ModelStore.get<MyModel>(); // needed since addition is lazy.
   expect(myModel.initCalled, true);
 }
 
 void testDisposeOnRemove() {
   final myModel = MyModel();
-  ModelStore.add(myModel);
+  ModelStore.add(()=>myModel);
+  ModelStore.get<MyModel>(); // needed since addition is lazy.
   ModelStore.remove<MyModel>();
   expect(myModel.disposeCalled, true);
 }

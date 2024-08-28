@@ -91,7 +91,7 @@ class SignalWidget<T extends SignalModel> extends StatefulWidget {
     required this.builder,
     this.signal,
     /// The optional model to be used by this widget.
-    T? model,
+    T Function()? model,
     this.onInit,
     this.onDispose,
   }) {
@@ -99,11 +99,6 @@ class SignalWidget<T extends SignalModel> extends StatefulWidget {
       ModelStore.add<T>(model);
     }
   }
-
-  void _removeModelFromStore() {
-    ModelStore.remove<T>();
-  }
-
 
   @override
   State<StatefulWidget> createState() => _SignalWidgetState();
@@ -136,8 +131,6 @@ class _SignalWidgetState extends State<SignalWidget> {
     }
     
     widget.onDispose?.call();
-    widget._removeModelFromStore();
-
     super.dispose();
   }
 
@@ -145,3 +138,4 @@ class _SignalWidgetState extends State<SignalWidget> {
     setState(() {});
   }
 }
+
