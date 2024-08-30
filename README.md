@@ -1,13 +1,22 @@
-# Signal
+# Flutter Signal
 Flutter signal provides a mechanism for communication between two entities. It is primarily
 meant to be used as a state management solution. Although Signal is a simple and powerful way for
-managing states, it is not limited to state management only. See the [Getting Started][#getting-started]
-for a quick introduction. Do check out the [Detailed Introduction][#detailed-introduction] for advanced
-usage and deeper understanding.
+managing states, it is not limited to state management only.
+
+Contents:
+- [Getting Started](#getting-started)
+    - [Signal Model](#signal-model)
+    - [Signal](#signal)
+    - [Signal Widget](#signal-widget)
+    - [Model Accessor](#model-accessor)
+    - [Property Widget](#property-widget)
+- [Tips](#Tips)
+- [Detailed Explanation of Signals](#detailed-explanation-of-signals)
 
 ## Getting started
 
 ### Signal Model
+
 Use [SignalModel] to create the data for your app. We will create a counter app.
 
 ```dart
@@ -20,6 +29,7 @@ class CountModel extends SignalModel {
 }
 ```
 ### Signal
+
 Use [Signal] for notifying the ui about data changes so that it can update itself.
 Emit the signal when data in model changes.
 
@@ -36,6 +46,7 @@ class CountModel extends SignalModel {
 }
 ```
 ### Signal Widget
+
 Use [SignalWidget] for updating your ui when the data changes.
 Fetch your model using [ModelStore.get] method which returns
 a model of the given type or null if none found.
@@ -49,7 +60,18 @@ a model of the given type or null if none found.
       ),
     ),
 ```
+Remove the model from the store when no longer need using ModelStore.remove method.
+
+```dart
+ModelStore.remove<CountModel>()
+```
+> Note:
+> To connect the widget to more than one signal
+> use the signals argument which takes a set of signals
+> instead of signal.
+
 ### Model Accessor
+
 Consider using a model accessor in the model class for shorter access of models.
 ```dart
 class CountModel extends SignalModel {
@@ -85,7 +107,9 @@ Now use it as follows:
       ),
 ```
 
+
 ### Property Widget
+
 Since the data is too small we can use [Property] to create our model.
 
 ```dart
@@ -109,7 +133,8 @@ Change the property value like this:
 ```dart
 _count.value = 3;
 ```
-For mutating the interior of more complex objects, use the [Property.update] method.
+In this case the previous value 0 is replaced with 3. If we want to instead modify the
+object stored in the property, then we have to use the [Property.update] method.
 
 ```dart
 // make other changes outside. Just write the final value like this or even 
@@ -117,8 +142,64 @@ For mutating the interior of more complex objects, use the [Property.update] met
 // if you just make changes to the underlying property value.
 _count.update((value) { value.count = 2 });
 ```
+> Note:
+> To update the ui when more than one property changes,
+> use the properties argument which takes a set of properties instead of one property.
 
-## Detailed Introduction
+That's all we need for state management!
+
+
+## Tips
+
+Implement the init and dispose method in your model to do some work when the model is added to
+or removed from the model store.
+
+```dart
+class CountModel extends SignalModel {
+ // other stuffs ...
+  
+  @override
+  void init() {
+    // this method will be called when the model is first accessed from the store.
+    super.init();
+  }
+  
+  @override
+  void dispose() {
+    // this method will be called when the model is removed from the store.
+    super.dispose();
+  }
+}
+```
+
+To do something other than ui change when a signal is emitted, connect the signal to a slot that
+does the desired job.
+
+```dart
+Slot doSomething() {
+  print('doing something');
+}
+connect(CountModel.countChanged, doSomething)
+```
+Disconnect the signal from the slot when no longer needed.
+
+```dart
+disconnect(CountModel.countChanged, doSomething)
+```
+
+To do something(for example disposing a controller) when the SignalWidget is created and disposed, provide two callbacks named
+onInit and onDispose. Same is available for PropertyWidget as well.
+
+```dart
+SignalWidget(
+  onInit: () => print('do something here'),
+  onDispose: () => print('do something here'),
+  // other stuffs
+  ),
+```
+
+## Detailed Explanation of Signals
+
 Let's assume a class Person with an age attribute wants to notify when its age changes. This is how
 the class look:
 ```dart
@@ -243,87 +324,6 @@ class AgePrinter {
   }
 ```
 As you can see, running the code won't print the new age after the age has become 100 once.
-
-We are now going to use the signal for state management purpose. Let's revisit the counter app
-with StatefulWidget approach.
-
-```dart
-import 'package:flutter/material.dart';
-
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ),
-    );
-  }
-}
-```
-
-We can see the problem here. There's no reason to include the floating action button inside the
-StatefulWidget. Actually the only thing we need is the Text widget. But to access the setState
-function the floating action button has to be included inside the stateful widget. It's hard to
-modify state of a StatefulWidget from outside. We are going to improve this using signals. First
-we will create a model for our app. The model class will hold the necessary data that will be used in the app.
-
 
 
 
