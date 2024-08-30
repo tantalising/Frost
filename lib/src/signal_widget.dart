@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'signal.dart';
 import 'signal_model.dart';
@@ -76,12 +77,16 @@ import 'signal_model.dart';
 class SignalWidget<T extends SignalModel> extends StatefulWidget {
   /// The widget to be built by this widget.
   final Widget Function() builder;
+
   /// Signals which when emitted rebuilds the widget.
   final Set<Signal>? signals;
+
   /// Singular variant of [SignalWidget.signals] for aesthetic purposes.
   final Signal? signal;
+
   /// A callback which does some work when the widget is created.
   final VoidCallback? onInit;
+
   /// A callback which does some work when the widget is disposed.
   final VoidCallback? onDispose;
 
@@ -90,11 +95,15 @@ class SignalWidget<T extends SignalModel> extends StatefulWidget {
     this.signals,
     required this.builder,
     this.signal,
+
     /// The optional model to be used by this widget.
     T? model,
     this.onInit,
     this.onDispose,
   }) {
+    assert(signal != null || signals != null,
+        'SignalWidget: Provide value for at least one of signal or signals parameter');
+
     if (model != null) {
       ModelStore.add<T>(() => model);
     }
@@ -129,7 +138,7 @@ class _SignalWidgetState extends State<SignalWidget> {
     for (final signal in signals) {
       signal.disconnect(_rebuild);
     }
-    
+
     widget.onDispose?.call();
     super.dispose();
   }
@@ -138,4 +147,3 @@ class _SignalWidgetState extends State<SignalWidget> {
     setState(() {});
   }
 }
-
