@@ -1,3 +1,5 @@
+import 'package:flutter/cupertino.dart';
+
 /// Interface for models intended to be used with signal mechanism.
 ///
 /// It is recommended to implement or inherit from this class for easier usage of signals.
@@ -113,4 +115,10 @@ abstract class _ModelStore {
   static void clear() {
     _modelRepository.clear();
   }
+}
+
+@visibleForTesting
+abstract class TestStub {
+  static Map<Type, SignalModel> get modelRepository => _ModelStore._modelRepository;
+  static Map<Type, ModelBuilder> get modelBuilderRepository => ModelStore._modelBuilderRepository;
 }

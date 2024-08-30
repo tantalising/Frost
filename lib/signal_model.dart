@@ -2,5 +2,4 @@
 
 library signal_model;
 
-export 'package:flutter_signal/src/signal_model.dart';
-
+export 'package:flutter_signal/src/signal_model.dart' hide TestStub;

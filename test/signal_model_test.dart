@@ -1,4 +1,4 @@
-import 'package:flutter_signal/signal_model.dart';
+import 'package:flutter_signal/src/signal_model.dart';
 import 'package:test/test.dart';
 
 
@@ -26,6 +26,7 @@ void main() {
   test("call init on add", testInitOnAdd);
   test("call dispose on remove", testDisposeOnRemove);
   test("replace an existing model from the store", testReplaceModel);
+  test("clear the model store", testClear);
 }
 
 void testAddModel() {
@@ -66,3 +67,17 @@ void testDisposeOnRemove() {
   expect(myModel.disposeCalled, true);
 }
 
+void testClear() {
+  final modelRepository = TestStub.modelRepository;
+  final modelBuilderRepository = TestStub.modelBuilderRepository;
+
+  ModelStore.add(() => TestModel());
+  ModelStore.get<TestModel>();
+  expect(modelRepository.isNotEmpty, true);
+  expect(modelBuilderRepository.isNotEmpty, true);
+  ModelStore.clear();
+  expect(modelRepository.isEmpty, true);
+  expect(modelRepository.isEmpty, true);
+}
+
+class TestModel extends SignalModel {}
