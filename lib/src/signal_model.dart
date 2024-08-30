@@ -8,10 +8,12 @@ import 'package:flutter/cupertino.dart';
 /// [ModelStore] to store, update, access and remove your models. In this case init and dispose
 /// will be called automatically when [ModelStore.add] and [ModelStore.remove] is used.
 /// See [ModelStore] for more details.
- abstract class SignalModel {
+abstract class SignalModel {
   SignalModel();
+
   /// Does some work when the model is added to the [ModelStore].
   void init() {}
+
   /// Cleans up when the model is removed from the [ModelStore].
   void dispose() {}
 }
@@ -37,6 +39,7 @@ import 'package:flutter/cupertino.dart';
 // where user wants to initialize models in bulk and use them
 // later or may not even use them. In this way it potentially saves resources.
 typedef ModelBuilder<T extends SignalModel> = T Function();
+
 abstract class ModelStore {
   static final _modelBuilderRepository = <Type, ModelBuilder>{};
 
@@ -56,16 +59,19 @@ abstract class ModelStore {
 
   /// Returns the model of given type from the store.
   /// Returns null if no such model exists.
-  static T? get<T extends SignalModel>() { //fixme: refactor for better understanding
-    var model = _ModelStore.get<T>();
-    if (model == null) {
-      final builder = _modelBuilderRepository[T];
-      if (builder != null) {
-         model = builder() as T?;
-        _ModelStore.add<T>(model as T);
-      }
+  static T? get<T extends SignalModel>() {
+    return _ModelStore.get<T>() ?? _buildModelFromBuilder();
+  }
+
+  static T? _buildModelFromBuilder<T extends SignalModel>() {
+    final model = _modelBuilderRepository[T]?.call() as T?;
+    switch (model) {
+      case null:
+        return model;
+      case _:
+        _ModelStore.add<T>(model);
+        return model;
     }
-    return model;
   }
 
   /// Replaces an existing model from the store with the same type of the given
@@ -74,7 +80,7 @@ abstract class ModelStore {
   /// Note that [ModelStore.add] doesn't replace a model if it already exists.
   /// Instead it silently ignores the request. So use this method for replacing
   /// an entire model.
-  static void replace<T extends SignalModel>(ModelBuilder<T> builder) { //fixme: refactor for better understanding
+  static void replace<T extends SignalModel>(ModelBuilder<T> builder) {
     _modelBuilderRepository.remove(T);
     _modelBuilderRepository[T] = builder;
     _ModelStore.replace(builder());
@@ -97,9 +103,9 @@ abstract class _ModelStore {
   }
 
   static T? remove<T extends SignalModel>() {
-   final T? model = _modelRepository.remove(T) as T?;
-   model?.dispose();
-   return model;
+    final T? model = _modelRepository.remove(T) as T?;
+    model?.dispose();
+    return model;
   }
 
   static T? get<T extends SignalModel>() {
@@ -119,6 +125,8 @@ abstract class _ModelStore {
 
 @visibleForTesting
 abstract class TestStub {
-  static Map<Type, SignalModel> get modelRepository => _ModelStore._modelRepository;
-  static Map<Type, ModelBuilder> get modelBuilderRepository => ModelStore._modelBuilderRepository;
+  static Map<Type, SignalModel> get modelRepository =>
+      _ModelStore._modelRepository;
+  static Map<Type, ModelBuilder> get modelBuilderRepository =>
+      ModelStore._modelBuilderRepository;
 }
