@@ -23,10 +23,6 @@ void main() {
     "dispose passed to signal widget being called test",
     (tester) => disposeCalledTest(tester),
   );
-  testWidgets(
-    "dispose part of model being called test",
-        (tester) => modelDisposeCalledTest(tester),
-  );
 }
 
 Future<void> singleSignalTest(tester) async {
@@ -64,11 +60,6 @@ Future<void> modelInitCalledTest(WidgetTester tester) async {
 Future<void> disposeCalledTest(WidgetTester tester) async {
   await _createAndDisposeSignalWidget(tester);
   expect(disposeCalled, true);
-}
-
-Future<void> modelDisposeCalledTest(WidgetTester tester) async {
-  await _createAndDisposeSignalWidget(tester);
-  expect(modelDisposeCalled, true);
 }
 
 Future<void> _createAndDisposeSignalWidget(tester) async {

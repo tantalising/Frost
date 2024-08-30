@@ -16,7 +16,6 @@
 
 /// Utility class for storing models of your app.
 ///
-/// It is not necessary to use this class. It is provided as a convenience.
 /// Models must be of type [SignalModel].
 /// The init method of [SignalModel] is called automatically when a model
 /// is added to this store.
@@ -26,6 +25,10 @@
 /// update the underlying model even if you add twice.
 /// You can replace an instance of a model with another one using the
 /// [ModelStore.replace] method.
+///
+/// Note that it is not necessary to use this class. If you aren't making your
+/// models from [SignalModel] then don't provide a model to [SignalWidget] and
+/// use your favourite way of dependency injection.
 
 // The class ModelStore is lazy and does not really add any model
 // until that particular model is requested. It helps in cases

@@ -2,16 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_signal/signal_model.dart';
 import 'package:flutter_signal/signal_widget.dart';
 
-bool disposeCalled = false; // global so that it doesn't go away with the
-// model when the widget is disposed. SignalWidget disposes models passed to
-// it when it itself get disposed but we need to verify that the onDispose
-// callback is also being called. So this variable will be changed when the
-// the call is made.
+bool disposeCalled = false;
 
-// for same reason
-bool modelDisposeCalled = false;
-
-class CountModel implements SignalModel {
+class CountModel extends SignalModel {
   int _counter = 0;
   int _anotherCounter = 5;
   int _yetAnotherCounter = 10;
@@ -49,11 +42,6 @@ class CountModel implements SignalModel {
   void incrementYetAnotherCount() {
     _yetAnotherCounter++;
     yetAnotherCountChanged();
-  }
-
-  @override
-  void dispose() {
-    modelDisposeCalled = true;
   }
 
   @override

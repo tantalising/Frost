@@ -61,7 +61,7 @@ void testInitOnAdd() {
 void testDisposeOnRemove() {
   final myModel = MyModel();
   ModelStore.add(()=>myModel);
-  ModelStore.get<MyModel>(); // needed since addition is lazy.
+  ModelStore.get<MyModel>(); // needed since addition is lazy.3
   ModelStore.remove<MyModel>();
   expect(myModel.disposeCalled, true);
 }
