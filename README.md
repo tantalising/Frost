@@ -43,7 +43,7 @@ a model of the given type or null if none found.
 ```dart
     SignalWidget(
       signal: CountModel.countChanged,
-      model: ()=>CountModel(), // <-- provide the model so that we can get it using model store
+      model: CountModel(), // <-- provide the model so that we can get it using model store
       builder: () => Text(
       ModelStore.get<CountModel>()!.count.toString(),
       ),
@@ -78,7 +78,7 @@ Now use it as follows:
 ```dart
       SignalWidget(
         signal: CountModel.countChanged,
-        model:()=>CountModel(),
+        model: CountModel(),
         builder: () => Text(
         CountModel.get.count.toString(),
         ),

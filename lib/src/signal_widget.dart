@@ -91,12 +91,12 @@ class SignalWidget<T extends SignalModel> extends StatefulWidget {
     required this.builder,
     this.signal,
     /// The optional model to be used by this widget.
-    T Function()? model,
+    T? model,
     this.onInit,
     this.onDispose,
   }) {
     if (model != null) {
-      ModelStore.add<T>(model);
+      ModelStore.add<T>(() => model);
     }
   }
 
