@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 /// Interface for models intended to be used with signal mechanism.
 ///
@@ -40,6 +40,7 @@ abstract class SignalModel {
 // later or may not even use them. In this way it potentially saves resources.
 typedef ModelBuilder<T extends SignalModel> = T Function();
 
+/// Stores and manages models of the app.
 abstract class ModelStore {
   static final _modelBuilderRepository = <Type, ModelBuilder>{};
 

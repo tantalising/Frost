@@ -3,7 +3,12 @@ Flutter signal provides a mechanism for communication between two entities. It i
 meant to be used as a state management solution. Although Signal is a simple and powerful way for
 managing states, it is not limited to state management only.
 
-Contents:
+## Installation
+```dart
+flutter pub add flutter_signal
+```
+
+## Contents:
 - [Getting Started](#getting-started)
     - [Signal Model](#signal-model)
     - [Signal](#signal)
@@ -11,7 +16,17 @@ Contents:
     - [Model Accessor](#model-accessor)
     - [Property Widget](#property-widget)
 - [Tips](#Tips)
+  - [Eager Model](#eager-model)
+  - [Bulk Addition of Model](#bulk-addition-of-model)
+  - [Model Init and Dispose](#model-init-and-dispose)
+  - [General Slot Usage](#general-slot-usage)
+  - [Widget Init and Dispose](#widget-init-and-dispose)
 - [Detailed Explanation of Signals](#detailed-explanation-of-signals)
+  - [Signal](#signal)
+  - [Slot](#slot)
+  - [Connecting Signals](#connecting-signals)
+  - [Passing Arguments to Signals](#passing-arguments-with-signals)
+  - [Disconnecting Signals](#disconnecting-signals)
 
 ## Getting started
 
@@ -60,7 +75,7 @@ a model of the given type or null if none found.
       ),
     ),
 ```
-Another widget needing the same model doesn't need to provide it again once it is added to store.
+Another widget needing the same model doesn't need to provide the model again once it is added to store.
 
 ```dart
   SignalWidget(
@@ -69,14 +84,14 @@ Another widget needing the same model doesn't need to provide it again once it i
 )
 ```
 
-Remove the model from the store when no longer need using ModelStore.remove method.
+Remove the model from the store when no longer needed using ModelStore.remove method.
 
 ```dart
 ModelStore.remove<CountModel>()
 ```
 > Note:
 > To connect the widget to more than one signal
-> use the signals argument which takes a set of signals
+> use the [SignalWidget.signals] argument which takes a set of signals
 > instead of signal.
 
 ### Model Accessor
@@ -146,33 +161,76 @@ In this case the previous value 0 is replaced with 3. If we want to instead modi
 object stored in the property, then we have to use the [Property.update] method.
 
 ```dart
-// make other changes outside. Just write the final value like this or even 
-// pass an empty value if needed. The ui won't update without calling update
-// if you just make changes to the underlying property value.
-_count.update((value) { value.count = 2 });
+// we'll modify this object...
+ class BigValue {
+  int valueFieldOne = 0;
+  String valueFieldTwo = '';
+  int valueForFieldOne() {
+    return 3;
+  }
+}
+// create property
+final bigValue = BigValue().property;
+// pretend to do some necessary stuff 
+final intValue = bigValue.value.valueForFieldOne();
+// this will update the ui
+bigValue.update((value) {
+  value.valueFieldOne = intValue;
+});
+// directly modifying won't update the ui 
+bigValue.value.valueFieldOne = bigValue.value.valueForFieldOne();
+//.. though calling an empty update now will update it (not recommended to update like this)
+bigValue.update((_)=>(_));
+
+// don't perform additional operation inside update. Just pass the final value.
+bigValue.update((value) {
+  final intValue = value.valueForFieldOne; // bad. Should be done outside.
+  value.valueFieldOne = intValue;
+})
 ```
 > Note:
 > To update the ui when more than one property changes,
 > use the properties argument which takes a set of properties instead of one property.
 
-That's all we need for state management! Now read the tips and if you want to know more 
+That's all we need for state management! Now read the tips(they are interesting!) and if you want to know more 
 about signals, check the [Detailed Explanation of Signals](#detailed-explanation-of-signals) section.
 
 ## Tips
 
+### Eager Model
+By default all the models added to the store are not created until first usage. To create a model as
+soon as it is added to the store, use [ModelStore.addEager].
+
+```dart
+  ModelStore.addEager(MyEagerModel());
+```
+### Bulk Addition of Model
+You can bulk add all the necessary models lazily(or not lazily) before your is app is run. 
+In this way, you will never need to provide a model to the SignalWidget and/or think about whether a 
+model already exists while using a SignalWidget.
+
+```dart
+void main() {
+  ModelStore.add(() => Model());
+  ModelStore.add(() => AnotherModel());
+  ModelStore.addEager(EagerModel());
+  ModelStore.addEager(AnotherEagerModel());
+  runApp(const MyApp());
+}
+```
+
+### Model Init and Dispose
 Implement the init and dispose method in your model to do some work when the model is added to
 or removed from the model store.
 
 ```dart
 class CountModel extends SignalModel {
  // other stuffs ...
-  
   @override
   void init() {
     // this method will be called when the model is first accessed from the store.
     super.init();
   }
-  
   @override
   void dispose() {
     // this method will be called when the model is removed from the store.
@@ -180,7 +238,7 @@ class CountModel extends SignalModel {
   }
 }
 ```
-
+### General Slot Usage
 To do something other than ui change when a signal is emitted, connect the signal to a slot that
 does the desired job. You may connect to the methods in the same class as well!
 
@@ -196,6 +254,7 @@ Disconnect the signal from the slot when no longer needed.
 disconnect(CountModel.countChanged, doSomething)
 ```
 
+### Widget Init and Dispose
 To do something(for example disposing a controller) when the SignalWidget is created and disposed, provide two callbacks named
 onInit and onDispose. Same is available for PropertyWidget as well.
 
@@ -203,12 +262,13 @@ onInit and onDispose. Same is available for PropertyWidget as well.
 SignalWidget(
   onInit: () => print('do something here'),
   onDispose: () => print('do something here'),
-  // other stuffs
+  //... other stuffs
   ),
 ```
 
 ## Detailed Explanation of Signals
 
+### Signal
 Let's assume a class Person with an age attribute wants to notify when its age changes. This is how
 the class look:
 ```dart
@@ -232,6 +292,8 @@ class Person {
 }
 
 ```
+
+### Signal Emission
 Now we need to _emit_ the signal whenever the age changes.
 
 ```dart
@@ -246,10 +308,12 @@ class Person {
   }
 }
 ```
+
+### Slot
 Let's create a class AgePrinter that prints "Age changed" whenever the age changes.
 We will create a method that will print the required string. Methods or functions which
 are invoked in response to a signal are called _slot_. There's nothing special about them.
-They are just regular functions which serves a specific purpose(Here responding to a signal).
+They are just regular functions which serve a specific purpose(Here responding to a signal).
 Here's how the class looks:
 
 ```dart
@@ -262,6 +326,8 @@ class AgePrinter {
 > Note:
 > _Slot_ is just a typedef for void. 
 > It is used to highlight that the method is intended to be used as a slot.
+
+### Connecting Signals
 
 We need to _connect_ the signal to our slot to make this work.
 
@@ -278,6 +344,8 @@ We need to _connect_ the signal to our slot to make this work.
 This will print "Age Updated" when run. 
 This is good but doesn't print the age of the person. In order to do so, we need to pass the
 age with the signal.
+
+### Passing Arguments with Signals
 
 ```dart
 class Person {
@@ -303,6 +371,8 @@ class AgePrinter {
 ```
 
 Running the code now would print "Age updated. New age is 12". 
+
+### Disconnecting Signals
 
 It is necessary to _disconnect_ the slot when no longer needed in order to avoid undesired
 calls to slots or calls to non-existent slots.
