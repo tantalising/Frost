@@ -9,6 +9,9 @@ final count = 0.property;
 final anotherCount = 5.property;
 final yetAnotherCount = 10.property;
 
+var initCalled = false;
+var disposeCalled = false;
+
 class PropertyWidgetTest extends StatelessWidget {
   const PropertyWidgetTest({super.key});
 
@@ -44,6 +47,8 @@ class MyHomePage extends StatelessWidget {
               'You have pushed the button this many times:',
             ),
             PropertyWidget(
+              onInit: () => initCalled = true,
+              onDispose: () => disposeCalled = true,
               property: count,
               builder: () => Text(
                 count.value.toString(),
