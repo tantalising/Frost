@@ -45,8 +45,15 @@ abstract class ModelStore {
 
   /// Adds a model to the Store.
   /// No model is added if a model of same type already exists.
+  /// Model is added lazily that is no model is created until it is
+  /// accessed for the first time.
   static void add<T extends SignalModel>(ModelBuilder<T> modelBuilder) {
     _modelBuilderRepository[T] = modelBuilder;
+  }
+
+  /// Adds the model to the store immediately instead of lazily like [ModelStore.add]
+  static void addEager<T extends SignalModel>(T model) {
+    _ModelStore.add<T>(model);
   }
 
   /// Removes the model of given type from the store and returns it.

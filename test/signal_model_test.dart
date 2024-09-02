@@ -32,12 +32,22 @@ void main() {
 void testAddModel() {
   final myModel = MyModel();
   ModelStore.add(() => myModel);
+  expect(TestStub.modelRepository.containsKey(MyModel), false);
+  expect(TestStub.modelBuilderRepository.containsKey(MyModel), true);
   expect(myModel, ModelStore.get<MyModel>());
+  expect(TestStub.modelRepository.containsKey(MyModel), true);
+}
+
+void testAddEagerlyModel() {
+  ModelStore.addEager(MyModel());
+  expect(TestStub.modelRepository.containsKey(MyModel), true);
 }
 
 void testGetModel() {
   ModelStore.add(()=>MyModel());
   expect(ModelStore.get<MyModel>(), isNot(null));
+  ModelStore.addEager(TestModel());
+  expect(ModelStore.get<TestModel>(), isNot(null));
 }
 
 void testRemoveModel() {
