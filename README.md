@@ -60,6 +60,15 @@ a model of the given type or null if none found.
       ),
     ),
 ```
+Another widget needing the same model doesn't need to provide it again once it is added to store.
+
+```dart
+  SignalWidget(
+    signal: CountModel.changed,
+    builder: () => Text (ModelStore.get<CountModel>()!.count.toString()),
+)
+```
+
 Remove the model from the store when no longer need using ModelStore.remove method.
 
 ```dart
@@ -146,8 +155,8 @@ _count.update((value) { value.count = 2 });
 > To update the ui when more than one property changes,
 > use the properties argument which takes a set of properties instead of one property.
 
-That's all we need for state management!
-
+That's all we need for state management! Now read the tips and if you want to know more 
+about signals, check the [Detailed Explanation of Signals](#detailed-explanation-of-signals) section.
 
 ## Tips
 
@@ -173,7 +182,7 @@ class CountModel extends SignalModel {
 ```
 
 To do something other than ui change when a signal is emitted, connect the signal to a slot that
-does the desired job.
+does the desired job. You may connect to the methods in the same class as well!
 
 ```dart
 Slot doSomething() {
