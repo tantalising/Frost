@@ -1,6 +1,6 @@
 name: flutter_signal
 description: "A package providing signal and slot mechanism."
-version: 0.0.1
+version: 1.0.0
 homepage: "not_yet_created_todo_fill_this"
 
 environment:
