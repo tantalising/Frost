@@ -35,6 +35,7 @@ flutter pub add flutter_signal
 Use [SignalModel] to create the data for your app. We will create a counter app.
 
 ```dart
+import 'package:flutter_signal/signal_model.dart';
 class CountModel extends SignalModel {
      void incrementCount() {
        _counter++;
@@ -67,6 +68,7 @@ Fetch your model using [ModelStore.get] method which returns
 a model of the given type or null if none found.
 
 ```dart
+    import 'package:flutter_signal/signal_widget.dart';
     SignalWidget(
       signal: CountModel.countChanged,
       model: CountModel(), // <-- provide the model so that we can get it using model store
@@ -89,7 +91,7 @@ Remove the model from the store when no longer needed using ModelStore.remove me
 ```dart
 ModelStore.remove<CountModel>()
 ```
-> Note:
+> [!Note]:
 > To connect the widget to more than one signal
 > use the [SignalWidget.signals] argument which takes a set of signals
 > instead of signal.
@@ -126,7 +128,7 @@ Now use it as follows:
         signal: CountModel.countChanged,
         model: CountModel(),
         builder: () => Text(
-        CountModel.get.count.toString(),
+        CountModel.get.count.toString(), // shorter access
         ),
       ),
 ```
@@ -137,6 +139,7 @@ Now use it as follows:
 Since the data is too small we can use [Property] to create our model.
 
 ```dart
+import 'package:flutter_signal/property.dart';
 final _count = 0.property;
 // final _count = Property(0); or like this as well.
 ```
@@ -188,7 +191,7 @@ bigValue.update((value) {
   value.valueFieldOne = intValue;
 })
 ```
-> Note:
+> [!Note]:
 > To update the ui when more than one property changes,
 > use the properties argument which takes a set of properties instead of one property.
 
@@ -217,6 +220,11 @@ void main() {
   ModelStore.addEager(AnotherEagerModel());
   runApp(const MyApp());
 }
+```
+If you are sure that the model is indeed in the store, the model accessor can be much shorter.
+
+```dart
+static MyModel get get => ModelStore.get()!;
 ```
 
 ### Model Init and Dispose

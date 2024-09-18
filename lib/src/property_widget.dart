@@ -74,7 +74,12 @@ class PropertyWidget<T extends Object> extends StatefulWidget {
   final VoidCallback? onDispose;
 
   const PropertyWidget(
-      {super.key, this.property, this.properties, required this.builder, this.onInit, this.onDispose});
+      {super.key,
+      this.property,
+      this.properties,
+      required this.builder,
+      this.onInit,
+      this.onDispose});
   @override
   State<PropertyWidget> createState() => _PropertyWidgetState();
 }
@@ -82,21 +87,24 @@ class PropertyWidget<T extends Object> extends StatefulWidget {
 class _PropertyWidgetState extends State<PropertyWidget> {
   @override
   void initState() {
+
     assert(widget.property != null || widget.properties != null,
-    'PropertyWidget: Provide value for at least one of property or properties parameter');
-    widget.property?.changed.connect(setState);
+        'PropertyWidget: Provide value for at least one of property or properties parameter');
+
+    widget.property?.privateChanged.connect(setState);
     widget.properties?.forEach((property) {
-      property.changed.connect(setState);
+      property.privateChanged.connect(setState);
     });
+
     widget.onInit?.call();
     super.initState();
   }
 
   @override
   void dispose() {
-    widget.property?.changed.disconnect(setState);
+    widget.property?.privateChanged.disconnect(setState);
     widget.properties?.forEach((property) {
-      property.changed.disconnect(setState);
+      property.privateChanged.disconnect(setState);
     });
     widget.onDispose?.call();
     super.dispose();

@@ -1,4 +1,3 @@
-import 'package:flutter_signal/signal.dart';
 import 'package:flutter_signal/signal_model.dart';
 
 class CountModel extends SignalModel {
