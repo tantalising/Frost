@@ -1,4 +1,5 @@
 import 'slot_store.dart';
+
 /// Signals help you to establish connections between two entities.
 ///
 /// It is essentially a communication mechanism.
@@ -23,7 +24,7 @@ import 'slot_store.dart';
 ///     print("something happened.");
 ///   }
 ///   ```
-///> Note:
+///> [!Note]:
 ///> _Slot_ is just a typedef for void.
 ///> It is used to highlight that the method is intended to be used as a slot.
 ///
@@ -45,7 +46,6 @@ import 'slot_store.dart';
 ///   signalEmitter.somethingHappened.disconnect(signalReceiver.handleSomethingHappened);
 ///   //disconnect(signalEmitter.somethingHappened, signalReceiver.handleSomethingHappened); <- or like this
 ///```
-
 
 /// Helps visually distinguishing between slots and other methods.
 /// Not necessary to use but helpful for void slots.
@@ -77,6 +77,7 @@ class Signal {
 }
 
 const _connect = connect;
+
 /// free floating connect function. Use it to connect a signal
 /// to a slot.
 void connect(Signal signal, Function slot) {
@@ -84,6 +85,7 @@ void connect(Signal signal, Function slot) {
 }
 
 const _disconnect = disconnect;
+
 /// free floating disconnect function. Use to disconnect a signal
 /// from a slot.
 void disconnect(Signal signal, Function slot) {
@@ -92,16 +94,62 @@ void disconnect(Signal signal, Function slot) {
 
 /*----------------------- private -------------------------------*/
 
-const _signalSlotMismatchErrorMessage =
-    'flutter_signal: Slot must be a function '
-    'with zero or one argument. Argument '
-    'should be provided if expected by slot.';
-
 // Just for a better looking assert.
 // Function type doesn't provide much info regarding signature.
 // Stricter types can't be used for some reason I don't remember.
 const _signalSignature = true;
 const _slotSignature = false;
+
+String _showError<T>(Function slot, [T? argument]) {
+  final calledWithArgument = argument != null;
+  final argumentMessage = calledWithArgument
+      ? 'with argument \'$argument\' of type \'${argument.runtimeType}\''
+      : 'with no argument';
+
+  String probablyArgumentMissingOrMismatched() {
+    if (!calledWithArgument) {
+      return '\n\tMost probable cause: An argument is expected by the slot but it was not provided with the signal.\n';
+    }
+    return '\n\tMost probable cause: Type of the argument provided with signal does not match with the type expected by the slot.\n';
+  }
+
+  String probablyMoreThanOneArgumentExpectedBySlot() {
+    final moreThanOneArgExpected = slot.toString().contains(',');
+    return moreThanOneArgExpected
+        ? '\n\tMost probable cause: Slot takes more than one argument which is not supported.\n'
+        : '';
+  }
+
+  String helpfulMessage() {
+    final message = probablyMoreThanOneArgumentExpectedBySlot();
+    return message == '' ? probablyArgumentMissingOrMismatched() : message;
+  }
+
+  List<String> slotMessages(bool calledWithArgument) {
+    return calledWithArgument
+        ? [
+      'Expected argument type does not match with the provided one.',
+      'Slot takes more than one argument.'
+    ]
+        : [
+      'Slot expects argument but was not provided.',
+      'Expected argument type does not match with the provided one.'
+    ];
+  }
+
+  final messages = slotMessages(calledWithArgument);
+  final message = '\n\nflutter_signal: Signal  was emitted $argumentMessage.\n'
+      'Slot \'$slot\' which was connected to this signal could not be called.\n'
+      'One of the following cases may have occurred: \n\n'
+      '\t1. ${messages[0]}\n'
+      '\t2. ${messages[1]}\n'
+      '\t ${helpfulMessage()}'
+      '\nNote that Slot must be a function '
+      'with zero or one argument.\n'
+      'fix the issue to continue without assertion failure.'
+      '\n';
+  return message;
+}
 
 void _emit<T>(Signal signal, [T? argument]) {
   if (argument == null) {
@@ -115,8 +163,8 @@ void _callSlots(Signal signal) {
   for (final slot in signal._slotSet.slots()) {
     try {
       slot();
-    } on NoSuchMethodError {
-      assert(_signalSignature == _slotSignature, _signalSlotMismatchErrorMessage);
+    } on Error {
+      assert(_signalSignature == _slotSignature, _showError(slot));
     }
   }
 }
@@ -125,13 +173,12 @@ void _callSlotsWithArgument<T>(Signal signal, T argument) {
   for (final slot in signal._slotSet.slots()) {
     try {
       slot(argument);
-    } on NoSuchMethodError {
+    } on Error {
       try {
         slot(); // In case the user chose to ignore the argument. Signal passes an argument but this particular slot doesn't need it.
       } on NoSuchMethodError {
-        assert(_signalSignature == _slotSignature, _signalSlotMismatchErrorMessage);
+        assert(_signalSignature == _slotSignature, _showError(slot, argument));
       }
     }
   }
 }
-
