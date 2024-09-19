@@ -1,3 +1,5 @@
+import 'package:flutter/cupertino.dart';
+
 import 'signal.dart';
 
 /// Class implementing property functionality.
@@ -22,6 +24,8 @@ class Property<T extends Object> {
   // setState. This can't be private since PropertyWidget needs this signal.
   // part/part of can't be used for library export files and I don't like these
   // two classes to be together. Maybe we need friends in dart?
+  // Adding the annotation so that at least a warning is emitted when this is used by others.
+  @visibleForTesting
   final privateChanged = Signal();
 
   Property(T value) {
