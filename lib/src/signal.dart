@@ -125,24 +125,18 @@ String _showError<T>(Function slot, [T? argument]) {
     return message == '' ? probablyArgumentMissingOrMismatched() : message;
   }
 
-  List<String> slotMessages(bool calledWithArgument) {
+  String slotMessages(bool calledWithArgument) {
     return calledWithArgument
-        ? [
-      'Expected argument type does not match with the provided one.',
-      'Slot takes more than one argument.'
-    ]
-        : [
-      'Slot expects argument but was not provided.',
-      'Expected argument type does not match with the provided one.'
-    ];
+        ? 'Slot takes more than one argument.'
+        : 'Slot expects argument but was not provided.';
   }
 
-  final messages = slotMessages(calledWithArgument);
-  final message = '\n\nflutter_signal: Signal  was emitted $argumentMessage.\n'
+  final slotMessage = slotMessages(calledWithArgument);
+  final message = '\n\nflutter_signal: Signal was emitted $argumentMessage.\n'
       'Slot \'$slot\' which was connected to this signal could not be called.\n'
       'One of the following cases may have occurred: \n\n'
-      '\t1. ${messages[0]}\n'
-      '\t2. ${messages[1]}\n'
+      '\t1. Expected argument type does not match with the provided one.\n'
+      '\t2. $slotMessage\n'
       '\t ${helpfulMessage()}'
       '\nNote that Slot must be a function '
       'with zero or one argument.\n'
