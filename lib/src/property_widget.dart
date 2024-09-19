@@ -90,10 +90,9 @@ class _PropertyWidgetState extends State<PropertyWidget> {
 
     assert(widget.property != null || widget.properties != null,
         'PropertyWidget: Provide value for at least one of property or properties parameter');
-    //ignore: invalid_use_of_visible_for_testing_member
+
     widget.property?.privateChanged.connect(setState);
     widget.properties?.forEach((property) {
-      //ignore: invalid_use_of_visible_for_testing_member
       property.privateChanged.connect(setState);
     });
 
@@ -103,10 +102,8 @@ class _PropertyWidgetState extends State<PropertyWidget> {
 
   @override
   void dispose() {
-    //ignore: invalid_use_of_visible_for_testing_member
     widget.property?.privateChanged.disconnect(setState);
     widget.properties?.forEach((property) {
-      //ignore: invalid_use_of_visible_for_testing_member
       property.privateChanged.disconnect(setState);
     });
     widget.onDispose?.call();
