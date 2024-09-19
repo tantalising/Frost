@@ -1,5 +1,3 @@
-import 'package:flutter/cupertino.dart';
-
 import 'signal.dart';
 
 /// Class implementing property functionality.
@@ -18,34 +16,10 @@ class Property<T extends Object> {
   /// Don't forget to disconnect the slot when not needed anymore.
 
   /// See the [PropertyWidget] for usage examples.
-  final changed = Signal(); // this signal adapts the undocumented privateChanged
-  // in a way such that no argument is needed to be provided by the user. The
-  // undocumented signal insists on an argument which works as the callback of the
-  // setState. This can't be private since PropertyWidget needs this signal.
-  // part/part of can't be used for library export files and I don't like these
-  // two classes to be together. Maybe we need friends in dart?
-  // Adding the annotation so that at least a warning is emitted when this is used by others.
-  @visibleForTesting
-  final privateChanged = Signal();
+  final changed = _DefaultArgSignal();
 
   Property(T value) {
     _value = value;
-
-    // Emit one of privateChanged or changed whenever the other one is emitted.
-    connect(privateChanged, _changedEmitter);
-    connect(changed, _privateChangedEmitter);
-  }
-
-  Slot _changedEmitter(_) {
-    disconnect(changed, _privateChangedEmitter);
-    changed();
-    connect(changed, _privateChangedEmitter);
-  }
-
-  Slot _privateChangedEmitter() {
-    disconnect(privateChanged, _changedEmitter);
-    privateChanged(()=>());
-    connect(privateChanged, _changedEmitter);
   }
 
   ///Returns the value of the property.
@@ -54,12 +28,12 @@ class Property<T extends Object> {
   /// Sets the value of the property.
   set value(T newValue) {
     if (newValue == _value) return;
-    privateChanged(() => _value = newValue);
+    changed(() => _value = newValue);
   }
 
   /// Updates value when it is a mutable object.
   void update(void Function(T value) updateFn) {
-    privateChanged(() => updateFn(_value));
+    changed(() => updateFn(_value));
   }
 }
 
@@ -67,4 +41,12 @@ class Property<T extends Object> {
 /// This is a shorter way for creating a property.
 extension PropertyExtension<T extends Object> on T {
   Property<T> get property => Property<T>(this);
+}
+
+class _DefaultArgSignal extends Signal{
+  @override
+  void call<T>([T? argument]) {
+    final defaultArgument = argument ?? ()=>();
+    super.call(defaultArgument);
+  }
 }
