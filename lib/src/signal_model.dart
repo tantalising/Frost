@@ -42,7 +42,7 @@ typedef ModelBuilder<T extends SignalModel> = T Function();
 
 /// Stores and manages models of the app.
 abstract class ModelStore {
-  static final _modelBuilderRepository = <Type, ModelBuilder>{};
+  static final _modelBuilderRepository = _TwoKeyTypeMap<Type, String, ModelBuilder>();
 
   /// Adds a model to the Store.
   /// No model is added if a model of same type already exists.
@@ -102,7 +102,7 @@ abstract class ModelStore {
 }
 
 abstract class _ModelStore {
-  static final _modelRepository = <Type, SignalModel>{};
+  static final _modelRepository = _TwoKeyTypeMap<Type, String, SignalModel>();
 
   static void add<T extends SignalModel>(T model) {
     if (_modelRepository.containsKey(T)) return;
@@ -131,10 +131,49 @@ abstract class _ModelStore {
   }
 }
 
+class _TwoKeyTypeMap<S extends Object, T extends Object, V extends Object> {
+  final firstTypeMap = <S,V>{};
+  final secondTypeMap = <T,V>{};
+
+  void operator []=(Object key, V value) {
+    if (_keyTypeNeitherSorT(key)) return; // we could've avoided this, had dart union types
+    _targetMap(key)[key] = value;
+}
+
+  V? operator [](Object key) {
+    if (_keyTypeNeitherSorT(key)) return null;
+    return _targetMap(key)[key];
+  }
+
+  V? remove<X extends Object>(X key) {
+    if (_keyTypeNeitherSorT(key)) return null;
+    return _targetMap(key).remove(key);
+  }
+
+  bool containsKey<X extends Object>(X key) {
+    return _targetMap(key).containsKey(key);
+  }
+
+  void clear() {
+    firstTypeMap.clear();
+    secondTypeMap.clear();
+  }
+
+  bool _keyTypeNeitherSorT<Key extends Object>(Key key) {
+    final bounded = key is S || key is T;
+    return !bounded;
+  }
+
+  Map<Object, V> _targetMap<X extends Object>(X key) {
+    final targetMap = key is S ? firstTypeMap : secondTypeMap;
+    return targetMap;
+  }
+}
+
 @visibleForTesting
 abstract class TestStub {
   static Map<Type, SignalModel> get modelRepository =>
-      _ModelStore._modelRepository;
+      _ModelStore._modelRepository.firstTypeMap;
   static Map<Type, ModelBuilder> get modelBuilderRepository =>
-      ModelStore._modelBuilderRepository;
+      ModelStore._modelBuilderRepository.firstTypeMap;
 }
