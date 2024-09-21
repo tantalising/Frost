@@ -17,6 +17,7 @@ flutter pub add flutter_signal
     - [Property Widget](#property-widget)
 - [Tips](#Tips)
   - [Eager Model](#eager-model)
+  - [Multiple Model of Same Type](#multiple-model-of-same-type)
   - [Bulk Addition of Model](#bulk-addition-of-model)
   - [Model Init and Dispose](#model-init-and-dispose)
   - [General Slot Usage](#general-slot-usage)
@@ -207,6 +208,17 @@ soon as it is added to the store, use [ModelStore.addEager].
 ```dart
   ModelStore.addEager(MyEagerModel());
 ```
+
+### Multiple Model of Same Type
+The model store won't add a model if another model of same type already exists. To add(or get etc) model of
+same type, you can use the same methods of ModelStore. Just pass an additional unique string id to the
+methods. Don't forget to pass the id when getting that model or performing any other operation on that model.
+
+```dart
+  ModelStore.add(MyEagerModel());
+  ModelStore.add(MyEagerModel(), 'myId');
+```
+
 ### Bulk Addition of Model
 You can bulk add all the necessary models lazily(or not lazily) before your is app is run. 
 In this way, you will never need to provide a model to the SignalWidget and/or think about whether a 
@@ -229,7 +241,7 @@ static MyModel get get => ModelStore.get()!;
 
 ### Model Init and Dispose
 Implement the init and dispose method in your model to do some work when the model is added to
-or removed from the model store.
+or removed from the model store. 
 
 ```dart
 class CountModel extends SignalModel {

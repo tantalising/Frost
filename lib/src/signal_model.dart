@@ -174,8 +174,9 @@ class _TwoKeyTypeMap<S extends Object, T extends Object, V extends Object> {
   final secondTypeMap = <T, V>{};
 
   void operator []=(Object key, V value) {
-    if (_keyTypeNeitherSorT(key))
-      return; // we could've avoided this, had dart union types
+    if (_keyTypeNeitherSorT(key)) {
+      return;
+    } // we could've avoided this, had dart union types
     _targetMap(key)[key] = value;
   }
 
