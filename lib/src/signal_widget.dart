@@ -8,7 +8,9 @@ import 'signal_model.dart';
 /// are emitted.
 /// The constructor takes an optional model argument. This way the
 /// [SignalModel.dispose] and [SignalModel.init] can automatically
-/// be called at appropriate times.
+/// be called at appropriate times, init is called when it is passed to
+/// this widget and dispose is called when the widget's own dispose method
+/// is called.
 /// The passed model can be accessed inside the [SignalWidget.builder] using
 /// following way:
 /// ```dart
@@ -65,7 +67,7 @@ import 'signal_model.dart';
 ///        SignalWidget(
 ///           signal: CountModel.countChanged,
 ///           model: CountModel(),
-///           builder: () => Text(
+///           builder: (context) => Text(
 ///            CountModel.get.count.toString(), //<-- model being accessed
 ///            style: Theme.of(context).textTheme.headlineMedium,
 ///             ),
@@ -75,7 +77,7 @@ import 'signal_model.dart';
 /// See [ModelStore] class to know more about managing models manually.
 class SignalWidget<T extends SignalModel> extends StatefulWidget {
   /// The widget to be built by this widget.
-  final Widget Function() builder;
+  final Widget Function(BuildContext context) builder;
 
   /// Signals which when emitted rebuilds the widget.
   final Set<Signal>? signals;
@@ -115,7 +117,7 @@ class SignalWidget<T extends SignalModel> extends StatefulWidget {
 class _SignalWidgetState extends State<SignalWidget> {
   @override
   Widget build(BuildContext context) {
-    return widget.builder();
+    return widget.builder(context);
   }
 
   @override

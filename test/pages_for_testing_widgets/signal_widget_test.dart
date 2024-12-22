@@ -96,7 +96,7 @@ class MyHomePage extends StatelessWidget {
               signal: CountModel.countChanged,
               model: CountModel(),
 
-              builder: () => Text(
+              builder: (context) => Text(
                 CountModel.get.count.toString(),
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
@@ -107,7 +107,7 @@ class MyHomePage extends StatelessWidget {
                 CountModel.anotherCountChanged,
                 CountModel.yetAnotherCountChanged
               },
-              builder: () => Column(
+              builder: (_) => Column(
                 children: [
                   Text(CountModel.get.anotherCount.toString()),
                   Text(CountModel.get.yetAnotherCount.toString()),

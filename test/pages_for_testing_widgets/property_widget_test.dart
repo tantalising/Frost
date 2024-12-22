@@ -50,14 +50,14 @@ class MyHomePage extends StatelessWidget {
               onInit: () => initCalled = true,
               onDispose: () => disposeCalled = true,
               property: count,
-              builder: () => Text(
+              builder: (context) => Text(
                 count.value.toString(),
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
             ),
             PropertyWidget(
               properties: {anotherCount, yetAnotherCount},
-              builder: () => Text("The another count is ${anotherCount.value.toString()}"
+              builder: (_) => Text("The another count is ${anotherCount.value.toString()}"
                   " and the yet another count is ${yetAnotherCount.value.toString()}"),
             ),
             MaterialButton(

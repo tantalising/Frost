@@ -21,7 +21,7 @@ import 'property.dart';
 /// ```dart
 ///      PropertyWidget(
 ///          property: _count,
-///          builder: () => Text(
+///          builder: (context) => Text(
 ///          _count.value.toString(),
 ///          style: Theme.of(context).textTheme.headlineMedium,
 ///          ),
@@ -59,7 +59,7 @@ import 'property.dart';
 /// won't update the ui unless you emit the [Property.changed] signal as well.
 class PropertyWidget<T extends Object> extends StatefulWidget {
   /// The builder for the widget that uses the property.
-  final Widget Function() builder;
+  final Widget Function(BuildContext context) builder;
 
   /// The property that the builder uses. Use when connecting only one property.
   final Property<T>? property;
@@ -111,6 +111,6 @@ class _PropertyWidgetState extends State<PropertyWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return widget.builder();
+    return widget.builder(context);
   }
 }

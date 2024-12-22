@@ -62,6 +62,12 @@ class CountModel extends SignalModel {
      int _counter = 0;
 }
 ```
+
+> [!Note]:
+> Do not place signals inside stateless widgets.
+> Instead use a private global variable.
+> Signals do not work if placed inside stateless widgets.
+
 ### Signal Widget
 
 Use [SignalWidget] for updating your ui when the data changes.
@@ -73,7 +79,7 @@ a model of the given type or null if none found.
     SignalWidget(
       signal: CountModel.countChanged,
       model: CountModel(), // <-- provide the model so that we can get it using model store
-      builder: () => Text(
+      builder: (_) => Text(
       ModelStore.get<CountModel>()!.count.toString(),
       ),
     ),
@@ -83,7 +89,7 @@ Another widget needing the same model doesn't need to provide the model again on
 ```dart
   SignalWidget(
     signal: CountModel.changed,
-    builder: () => Text (ModelStore.get<CountModel>()!.count.toString()),
+    builder: (_) => Text (ModelStore.get<CountModel>()!.count.toString()),
 )
 ```
 
@@ -128,7 +134,7 @@ Now use it as follows:
       SignalWidget(
         signal: CountModel.countChanged,
         model: CountModel(),
-        builder: () => Text(
+        builder: (_) => Text(
         CountModel.get.count.toString(), // shorter access
         ),
       ),
@@ -150,9 +156,8 @@ Use [PropertyWidget] for using this property in your app.
 ```dart
     PropertyWidget(
       property: _count,
-      builder: () => Text(
+      builder: (_) => Text(
         _count.value.toString(),
-        style: Theme.of(context).textTheme.headlineMedium,
       ),
     ),
 ```

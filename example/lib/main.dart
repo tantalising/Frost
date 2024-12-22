@@ -50,7 +50,7 @@ class MyHomePage extends StatelessWidget {
             SignalWidget(
               signal: CountModel.countChanged,
               model: CountModel(),
-              builder: () => Text(
+              builder: (context) => Text(
                 ModelStore.get<CountModel>()!.count.toString(),
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
