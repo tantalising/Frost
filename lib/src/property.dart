@@ -28,12 +28,14 @@ class Property<T extends Object> {
   /// Sets the value of the property.
   set value(T newValue) {
     if (newValue == _value) return;
-    changed(() => _value = newValue);
+    _value = newValue;
+    changed();
   }
 
   /// Updates value when it is a mutable object.
   void update(void Function(T value) updateFn) {
-    changed(() => updateFn(_value));
+    updateFn(_value);
+    changed();
   }
 }
 
