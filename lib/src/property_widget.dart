@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../signal.dart';
 import 'property.dart';
 
 /// An Widget that accepts a property and automatically rebuilds
@@ -90,9 +91,9 @@ class _PropertyWidgetState extends State<PropertyWidget> {
 
     assert(widget.property != null || widget.properties != null,
         'PropertyWidget: Provide value for at least one of property or properties parameter');
-    widget.property?.changed.connect(setState);
+    widget.property?.changed.connect(_rebuild);
     widget.properties?.forEach((property) {
-      property.changed.connect(setState);
+      property.changed.connect(_rebuild);
     });
 
     widget.onInit?.call();
@@ -101,9 +102,9 @@ class _PropertyWidgetState extends State<PropertyWidget> {
 
   @override
   void dispose() {
-    widget.property?.changed.disconnect(setState);
+    widget.property?.changed.disconnect(_rebuild);
     widget.properties?.forEach((property) {
-      property.changed.disconnect(setState);
+      property.changed.disconnect(_rebuild);
     });
     widget.onDispose?.call();
     super.dispose();
@@ -112,5 +113,9 @@ class _PropertyWidgetState extends State<PropertyWidget> {
   @override
   Widget build(BuildContext context) {
     return widget.builder(context);
+  }
+
+  Slot _rebuild() {
+    setState(() {});
   }
 }
