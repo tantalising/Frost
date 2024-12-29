@@ -16,7 +16,7 @@ class Property<T extends Object> {
   /// Don't forget to disconnect the slot when not needed anymore.
 
   /// See the [PropertyWidget] for usage examples.
-  final changed = _DefaultArgSignal();
+  final changed = Signal();
 
   Property(T value) {
     _value = value;
@@ -43,12 +43,4 @@ class Property<T extends Object> {
 /// This is a shorter way for creating a property.
 extension PropertyExtension<T extends Object> on T {
   Property<T> get property => Property<T>(this);
-}
-
-class _DefaultArgSignal extends Signal{
-  @override
-  void call<T>([T? argument]) {
-    final defaultArgument = argument ?? ()=>();
-    super.call(defaultArgument);
-  }
 }
