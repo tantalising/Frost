@@ -1,4 +1,5 @@
 import 'slot_store.dart';
+import 'package:flutter/material.dart';
 
 /// Signals help you to establish connections between two entities.
 ///
@@ -174,5 +175,27 @@ void _callSlotsWithArgument<T>(Signal signal, T argument) {
         assert(_signalSignature == _slotSignature, _showError(slot, argument));
       }
     }
+  }
+}
+
+@visibleForTesting
+class SignalTester {
+  final Signal signal;
+  SignalTester(this.signal);
+
+  Iterable<Function> slots() {
+    final slotSet = signal._slotSet;
+    slotSet.sync();
+    return slotSet.slots();
+  }
+
+  bool isThereSlotToBeRemoved() {
+    final accessor = SlotSetInternalAccessor(signal._slotSet);
+    return accessor.slotsTobeRemoved().isNotEmpty;
+  }
+
+  bool isThereSlotTobeAdded() {
+    final accessor = SlotSetInternalAccessor(signal._slotSet);
+    return accessor.slotsTobeAdded().isNotEmpty;
   }
 }

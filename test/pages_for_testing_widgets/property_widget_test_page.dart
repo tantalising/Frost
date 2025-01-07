@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_signal/property.dart';
+import 'package:flutter_signal/property_widget.dart';
 
 void main() {
   runApp(const PropertyWidgetTest());

@@ -91,6 +91,19 @@ class SignalWidget<T extends SignalModel> extends StatefulWidget {
   /// A callback which does some work when the widget is disposed.
   final VoidCallback? onDispose;
 
+  /// A callback which is called when this widget is reinserted into the tree after having been
+  /// removed via deactivate method of the state object of this widget.
+  final VoidCallback? onActivate;
+
+  /// A callback which is called when the deactivate method of this widget's state is called.
+  final VoidCallback? onDeactivate;
+
+  /// A callback which is called when a dependency of this widget's state changes.
+  final VoidCallback? onDidChangeDependencies;
+
+  /// A callback which is called when didUpdateWidget method of state of this widget is called.
+  final void Function(SignalWidget<T>)? onDidUpdateWidget;
+
   SignalWidget({
     super.key,
     this.signals,
@@ -101,9 +114,13 @@ class SignalWidget<T extends SignalModel> extends StatefulWidget {
     T? model,
     this.onInit,
     this.onDispose,
+    this.onActivate,
+    this.onDeactivate,
+    this.onDidChangeDependencies,
+    this.onDidUpdateWidget,
   }) {
     assert(signal != null || signals != null,
-        'SignalWidget: Provide value for at least one of signal or signals parameter');
+    'SignalWidget: Provide value for at least one of signal or signals parameter');
 
     if (model != null) {
       ModelStore.add<T>(() => model);
@@ -111,10 +128,10 @@ class SignalWidget<T extends SignalModel> extends StatefulWidget {
   }
 
   @override
-  State<StatefulWidget> createState() => _SignalWidgetState();
+  State<StatefulWidget> createState() => _SignalWidgetState<T>();
 }
 
-class _SignalWidgetState extends State<SignalWidget> {
+class _SignalWidgetState<T extends SignalModel> extends State<SignalWidget<T>> {
   @override
   Widget build(BuildContext context) {
     return widget.builder(context);
@@ -129,6 +146,50 @@ class _SignalWidgetState extends State<SignalWidget> {
     }
     widget.onInit?.call();
     super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    widget.onDidChangeDependencies?.call();
+    super.didChangeDependencies();
+  }
+
+  @override
+  void didUpdateWidget(covariant SignalWidget<T> oldWidget) {
+    // Disconnect old signals and connect new ones if necessary.
+    if (oldWidget.signal != widget.signal) {
+      oldWidget.signal?.disconnect(_rebuild);
+      widget.signal?.connect(_rebuild);
+    }
+
+    final oldSignals = oldWidget.signals ?? {};
+    final currentSignals = widget.signals ?? {};
+
+    final newSignals = currentSignals.where((signal) => !oldSignals.contains(signal));
+    final notUsedSignals = oldSignals.where((signal) => !currentSignals.contains(signal));
+
+    for(final signal in notUsedSignals) {
+      signal.disconnect(_rebuild);
+    }
+
+    for (final signal in newSignals) {
+      signal.connect(_rebuild);
+    }
+
+    widget.onDidUpdateWidget?.call(oldWidget);
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
+  void deactivate() {
+    widget.onDeactivate?.call();
+    super.deactivate();
+  }
+
+  @override
+  void activate() {
+    widget.onActivate?.call();
+    super.activate();
   }
 
   @override
@@ -148,3 +209,4 @@ class _SignalWidgetState extends State<SignalWidget> {
     setState(() {});
   }
 }
+

@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'package:flutter/material.dart';
 
 /// This class wraps a hashSet to prevent direct access to it.
 ///
@@ -32,5 +33,19 @@ class SlotStore {
     _slots.removeAll(_slotsToBeRemoved);
     _slotsToBeAdded.clear();
     _slotsToBeRemoved.clear();
+  }
+}
+
+@visibleForTesting
+class SlotSetInternalAccessor {
+  final SlotStore slotSet;
+  SlotSetInternalAccessor(this.slotSet);
+
+  Set<Function> slotsTobeRemoved() {
+    return slotSet._slotsToBeRemoved;
+  }
+
+  Set<Function> slotsTobeAdded() {
+    return slotSet._slotsToBeAdded;
   }
 }

@@ -82,10 +82,10 @@ class PropertyWidget<T extends Object> extends StatefulWidget {
       this.onInit,
       this.onDispose});
   @override
-  State<PropertyWidget> createState() => _PropertyWidgetState();
+  State<PropertyWidget> createState() => _PropertyWidgetState<T>();
 }
 
-class _PropertyWidgetState extends State<PropertyWidget> {
+class _PropertyWidgetState<T extends Object> extends State<PropertyWidget<T>> {
   @override
   void initState() {
 
