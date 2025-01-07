@@ -1,4 +1,5 @@
-import 'package:flutter_signal/src/signal_model.dart';
+import 'package:flutter_signal/model_store.dart';
+import 'package:flutter_signal/src/model_store.dart';
 import 'package:test/test.dart';
 
 class MyModel implements SignalModel {

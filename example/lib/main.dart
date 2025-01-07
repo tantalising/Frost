@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_signal/signal_model.dart';
 import 'package:flutter_signal/signal_widget.dart';
+import 'package:flutter_signal/model_store.dart';
 import 'model.dart';
 
 Slot doSomething() {
