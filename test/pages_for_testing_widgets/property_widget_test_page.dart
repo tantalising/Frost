@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_signal/property_widget.dart';
 
-void main() {
-  runApp(const PropertyWidgetTest());
-}
-
 final count = 0.property;
 final anotherCount = 5.property;
 final yetAnotherCount = 10.property;

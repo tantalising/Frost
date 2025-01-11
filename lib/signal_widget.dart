@@ -3,6 +3,6 @@
 
 library signal_widget;
 
-export 'package:flutter_signal/src/signal.dart';
+export 'package:flutter_signal/src/signal.dart' hide SignalTester;
 export 'package:flutter_signal/src/signal_widget.dart';
 

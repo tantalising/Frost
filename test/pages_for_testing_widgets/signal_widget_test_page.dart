@@ -53,10 +53,6 @@ class CountModel extends SignalModel {
   }
 }
 
-void main() {
-  runApp(const SignalWidgetTest());
-}
-
 class SignalWidgetTest extends StatelessWidget {
   const SignalWidgetTest({super.key});
 
