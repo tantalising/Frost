@@ -8,9 +8,9 @@ import 'package:flutter_signal/signal.dart';
 /// disconnect some signals in a stateful widget's initState and dispose methods.
 
 abstract class SignalStatefulWidget extends StatefulWidget {
-  const SignalStatefulWidget({super.key, required this.signals});
+  const SignalStatefulWidget({super.key, required Set<Signal> signals}): _signals = signals;
 
-  final Set<Signal> signals;
+  final Set<Signal> _signals;
 
   @override
   SignalState createState();
@@ -19,7 +19,7 @@ abstract class SignalStatefulWidget extends StatefulWidget {
 abstract class SignalState<T extends SignalStatefulWidget> extends State<T> {
   @override
   void initState() {
-    for (final signal in widget.signals) {
+    for (final signal in widget._signals) {
       signal.connect(_rebuild);
     }
     super.initState();
@@ -27,21 +27,23 @@ abstract class SignalState<T extends SignalStatefulWidget> extends State<T> {
 
   @override
   void dispose() {
-    for (final signal in widget.signals) {
+    for (final signal in widget._signals) {
       signal.disconnect(_rebuild);
     }
     super.dispose();
   }
 
     Slot _rebuild() {
-    setState(() => ());
+    setState(onRebuild);
   }
+
+  void onRebuild() {}
 
   @override
   void didUpdateWidget(covariant T oldWidget) {
     // Disconnect old signals and connect new ones if necessary.
-    final oldSignals = oldWidget.signals;
-    final currentSignals = widget.signals;
+    final oldSignals = oldWidget._signals;
+    final currentSignals = widget._signals;
 
     final newSignals =
         currentSignals.where((signal) => !oldSignals.contains(signal));
