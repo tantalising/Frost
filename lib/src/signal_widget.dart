@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_signal/src/signal_stateful_widget.dart';
 import 'model_store.dart';
 import 'signal.dart';
 import 'signal_model.dart';
@@ -77,7 +76,7 @@ import 'signal_model.dart';
 /// ```
 ///
 /// See [ModelStore] class to know more about managing models manually.
-class SignalWidget<T extends SignalModel> extends SignalStatefulWidget {
+class SignalWidget<T extends SignalModel> extends StatefulWidget {
   /// The widget to be built by this widget.
   final Widget Function(BuildContext context) builder;
 
@@ -107,6 +106,7 @@ class SignalWidget<T extends SignalModel> extends SignalStatefulWidget {
   final void Function(SignalWidget<T>)? onDidUpdateWidget;
 
   SignalWidget({
+    super.key,
     this.signals,
     required this.builder,
     this.signal,
@@ -119,7 +119,7 @@ class SignalWidget<T extends SignalModel> extends SignalStatefulWidget {
     this.onDeactivate,
     this.onDidChangeDependencies,
     this.onDidUpdateWidget,
-  }) : super(signals: (signals ?? {}).union({if (signal != null) signal}), key: UniqueKey()) {
+  }) {
     assert(signal != null || signals != null,
     'SignalWidget: Provide value for at least one of signal or signals parameter');
 
@@ -129,10 +129,10 @@ class SignalWidget<T extends SignalModel> extends SignalStatefulWidget {
   }
 
   @override
-  SignalState<SignalStatefulWidget> createState() => _SignalWidgetState<T>();
+  State<StatefulWidget> createState() => _SignalWidgetState<T>();
 }
 
-class _SignalWidgetState<T extends SignalModel> extends SignalState<SignalWidget<T>> {
+class _SignalWidgetState<T extends SignalModel> extends State<SignalWidget<T>> {
   @override
   Widget build(BuildContext context) {
     return widget.builder(context);
@@ -140,6 +140,11 @@ class _SignalWidgetState<T extends SignalModel> extends SignalState<SignalWidget
 
   @override
   void initState() {
+    widget.signal?.connect(_rebuild);
+    final signals = widget.signals ?? {};
+    for (final signal in signals) {
+      connect(signal, _rebuild);
+    }
     widget.onInit?.call();
     super.initState();
   }
@@ -152,6 +157,26 @@ class _SignalWidgetState<T extends SignalModel> extends SignalState<SignalWidget
 
   @override
   void didUpdateWidget(covariant SignalWidget<T> oldWidget) {
+    // Disconnect old signals and connect new ones if necessary.
+    if (oldWidget.signal != widget.signal) {
+      oldWidget.signal?.disconnect(_rebuild);
+      widget.signal?.connect(_rebuild);
+    }
+
+    final oldSignals = oldWidget.signals ?? {};
+    final currentSignals = widget.signals ?? {};
+
+    final newSignals = currentSignals.where((signal) => !oldSignals.contains(signal));
+    final notUsedSignals = oldSignals.where((signal) => !currentSignals.contains(signal));
+
+    for(final signal in notUsedSignals) {
+      signal.disconnect(_rebuild);
+    }
+
+    for (final signal in newSignals) {
+      signal.connect(_rebuild);
+    }
+
     widget.onDidUpdateWidget?.call(oldWidget);
     super.didUpdateWidget(oldWidget);
   }
@@ -170,8 +195,19 @@ class _SignalWidgetState<T extends SignalModel> extends SignalState<SignalWidget
 
   @override
   void dispose() {
+    widget.signal?.disconnect(_rebuild);
+
+    final signals = widget.signals ?? {};
+    for (final signal in signals) {
+      signal.disconnect(_rebuild);
+    }
+
     widget.onDispose?.call();
     super.dispose();
+  }
+
+  Slot _rebuild() {
+    setState(() {});
   }
 }
 
