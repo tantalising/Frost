@@ -8,18 +8,19 @@ import 'package:flutter_signal/signal.dart';
 /// disconnect some signals in a stateful widget's initState and dispose methods.
 
 abstract class SignalStatefulWidget extends StatefulWidget {
-  const SignalStatefulWidget({super.key, required this.signals});
-
-  final Set<Signal> signals;
+  const SignalStatefulWidget({super.key});
 
   @override
   SignalState createState();
 }
 
 abstract class SignalState<T extends SignalStatefulWidget> extends State<T> {
+
+  Set<Signal> signals();
+
   @override
   void initState() {
-    for (final signal in widget.signals) {
+    for (final signal in signals()) {
       signal.connect(_rebuild);
     }
     super.initState();
@@ -27,36 +28,19 @@ abstract class SignalState<T extends SignalStatefulWidget> extends State<T> {
 
   @override
   void dispose() {
-    for (final signal in widget.signals) {
+    for (final signal in signals()) {
       signal.disconnect(_rebuild);
     }
     super.dispose();
   }
 
     Slot _rebuild() {
-    setState(() => ());
+    setState(onRebuild);
   }
 
-  @override
-  void didUpdateWidget(covariant T oldWidget) {
-    // Disconnect old signals and connect new ones if necessary.
-    final oldSignals = oldWidget.signals;
-    final currentSignals = widget.signals;
-
-    final newSignals =
-        currentSignals.where((signal) => !oldSignals.contains(signal));
-    final notUsedSignals =
-        oldSignals.where((signal) => !currentSignals.contains(signal));
-
-    for (final signal in notUsedSignals) {
-      signal.disconnect(_rebuild);
-    }
-
-    for (final signal in newSignals) {
-      signal.connect(_rebuild);
-    }
-    super.didUpdateWidget(oldWidget);
-  }
+  /// This callback will be passed to setState when this widget is rebuilt
+  /// due to signal emission.
+  void onRebuild() {}
 
   @override
   Widget build(BuildContext context);
