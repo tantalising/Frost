@@ -106,7 +106,6 @@ class SignalWidget<T extends SignalModel> extends StatefulWidget {
   final void Function(SignalWidget<T>)? onDidUpdateWidget;
 
   SignalWidget({
-    super.key,
     this.signals,
     required this.builder,
     this.signal,
@@ -119,9 +118,9 @@ class SignalWidget<T extends SignalModel> extends StatefulWidget {
     this.onDeactivate,
     this.onDidChangeDependencies,
     this.onDidUpdateWidget,
-  }) {
+  }):super(key: UniqueKey()) {
     assert(signal != null || signals != null,
-    'SignalWidget: Provide value for at least one of signal or signals parameter');
+        'SignalWidget: Provide value for at least one of signal or signals parameter');
 
     if (model != null) {
       ModelStore.add<T>(() => model);
@@ -140,8 +139,8 @@ class _SignalWidgetState<T extends SignalModel> extends State<SignalWidget<T>> {
 
   @override
   void initState() {
-    widget.signal?.connect(_rebuild);
-    final signals = widget.signals ?? {};
+    final signals = {...?widget.signals, widget.signal}.whereType<Signal>();
+
     for (final signal in signals) {
       connect(signal, _rebuild);
     }
@@ -157,23 +156,19 @@ class _SignalWidgetState<T extends SignalModel> extends State<SignalWidget<T>> {
 
   @override
   void didUpdateWidget(covariant SignalWidget<T> oldWidget) {
-    // Disconnect old signals and connect new ones if necessary.
-    if (oldWidget.signal != widget.signal) {
-      oldWidget.signal?.disconnect(_rebuild);
-      widget.signal?.connect(_rebuild);
-    }
+    final oldSignals =
+        {...?oldWidget.signals, oldWidget.signal}.whereType<Signal>().toSet();
+    final newSignals =
+        {...?widget.signals, widget.signal}.whereType<Signal>().toSet();
 
-    final oldSignals = oldWidget.signals ?? {};
-    final currentSignals = widget.signals ?? {};
+    final toBeUsedSignals = newSignals.difference(oldSignals);
+    final notUsedSignals = oldSignals.difference(newSignals);
 
-    final newSignals = currentSignals.where((signal) => !oldSignals.contains(signal));
-    final notUsedSignals = oldSignals.where((signal) => !currentSignals.contains(signal));
-
-    for(final signal in notUsedSignals) {
+    for (final signal in notUsedSignals) {
       signal.disconnect(_rebuild);
     }
 
-    for (final signal in newSignals) {
+    for (final signal in toBeUsedSignals) {
       signal.connect(_rebuild);
     }
 
@@ -210,4 +205,3 @@ class _SignalWidgetState<T extends SignalModel> extends State<SignalWidget<T>> {
     setState(() {});
   }
 }
-
