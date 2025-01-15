@@ -99,12 +99,6 @@ class SignalWidget<T extends SignalModel> extends StatefulWidget {
   /// A callback which is called when the deactivate method of this widget's state is called.
   final VoidCallback? onDeactivate;
 
-  /// A callback which is called when a dependency of this widget's state changes.
-  final VoidCallback? onDidChangeDependencies;
-
-  /// A callback which is called when didUpdateWidget method of state of this widget is called.
-  final void Function(SignalWidget<T>)? onDidUpdateWidget;
-
   SignalWidget({
     this.signals,
     required this.builder,
@@ -116,8 +110,6 @@ class SignalWidget<T extends SignalModel> extends StatefulWidget {
     this.onDispose,
     this.onActivate,
     this.onDeactivate,
-    this.onDidChangeDependencies,
-    this.onDidUpdateWidget,
   }):super(key: UniqueKey()) {
     assert(signal != null || signals != null,
         'SignalWidget: Provide value for at least one of signal or signals parameter');
@@ -146,34 +138,6 @@ class _SignalWidgetState<T extends SignalModel> extends State<SignalWidget<T>> {
     }
     widget.onInit?.call();
     super.initState();
-  }
-
-  @override
-  void didChangeDependencies() {
-    widget.onDidChangeDependencies?.call();
-    super.didChangeDependencies();
-  }
-
-  @override
-  void didUpdateWidget(covariant SignalWidget<T> oldWidget) {
-    final oldSignals =
-        {...?oldWidget.signals, oldWidget.signal}.whereType<Signal>().toSet();
-    final newSignals =
-        {...?widget.signals, widget.signal}.whereType<Signal>().toSet();
-
-    final toBeUsedSignals = newSignals.difference(oldSignals);
-    final notUsedSignals = oldSignals.difference(newSignals);
-
-    for (final signal in notUsedSignals) {
-      signal.disconnect(_rebuild);
-    }
-
-    for (final signal in toBeUsedSignals) {
-      signal.connect(_rebuild);
-    }
-
-    widget.onDidUpdateWidget?.call(oldWidget);
-    super.didUpdateWidget(oldWidget);
   }
 
   @override

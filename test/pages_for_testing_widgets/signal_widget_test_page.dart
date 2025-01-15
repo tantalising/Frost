@@ -4,9 +4,6 @@ import 'package:flutter_signal/signal_model.dart';
 import 'package:flutter_signal/signal_widget.dart';
 
 bool disposeCalled = false;
-bool didChangeDependenciesCalled = false;
-bool didUpdateWidgetCalled = false;
-
 class CountModel extends SignalModel {
   int _counter = 0;
   int _anotherCounter = 5;
@@ -87,30 +84,18 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  var _customTheme = ThemeData(primaryColor: Colors.green);
-  void _changeTheme() {
-    setState(() {
-      _customTheme = ThemeData(primaryColor: Colors.red);
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
         children: [
-          Theme(
-            data: _customTheme,
-            child: SignalWidget(
-              onInit: () => CountModel.get.initCalled = true,
-              onDispose: () => disposeCalled = true,
-              onDidChangeDependencies: () => didChangeDependenciesCalled = true,
-              onDidUpdateWidget: (_) => didUpdateWidgetCalled = true,
-              signal: CountModel.countChanged,
-              model: CountModel(),
-              builder: (context) => Text(
-                CountModel.get.count.toString(),
-              ),
+          SignalWidget(
+            onInit: () => CountModel.get.initCalled = true,
+            onDispose: () => disposeCalled = true,
+            signal: CountModel.countChanged,
+            model: CountModel(),
+            builder: (context) => Text(
+              CountModel.get.count.toString(),
             ),
           ),
           SignalWidget<CountModel>(
@@ -129,50 +114,6 @@ class _MyHomePageState extends State<MyHomePage> {
                     CountModel.get.incrementAnotherCount();
                     CountModel.get.incrementYetAnotherCount();
                   },
-                ),
-                MaterialButton(
-                  key: const ValueKey('updateWidgetButton'),
-                  onPressed: () => setState(() {}),
-                ),
-                MaterialButton(
-                  key: const ValueKey('changeDependencyButton'),
-                  onPressed: _changeTheme,
-                ),
-              ],
-            ),
-          ),
-          // Test proper reconnection of signals on didUpdateWidget
-          SignalWidget(
-            signals: signalSet,
-            builder: (_) => MaterialButton(
-              key: const ValueKey('multiSignalReconnectionButton'),
-              onPressed: () => setState(
-                () {
-                  signalSet = signalSetTwo;
-                },
-              ),
-            ),
-          ),
-          // Test proper reconnection of single signal on didUpdateWidget
-          SignalWidget(
-            signal: signal,
-            builder: (_) => Column(
-              children: [
-                MaterialButton(
-                  key: const ValueKey('singleSignalReconnectionButton'),
-                  onPressed: () => setState(
-                        () {
-                      signal = singleSignalTwo;
-                    },
-                  ),
-                ),
-                MaterialButton(
-                  key: const ValueKey('singleSignalNoReconnectionButton'),
-                  onPressed: () => setState(
-                        () {
-                      signal = singleSignalTwo;
-                    },
-                  ),
                 ),
               ],
             ),

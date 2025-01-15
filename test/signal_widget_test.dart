@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_signal/model_store.dart';
-import 'package:flutter_signal/src/signal.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'pages_for_testing_widgets/signal_widget_reparent_test_page.dart';
 import 'pages_for_testing_widgets/signal_widget_test_page.dart';
@@ -31,25 +30,6 @@ void main() {
   testWidgets(
     'OnActivate callback of SignalWidget being called test',
     (tester) => activateCalledTest(tester),
-  );
-
-  testWidgets(
-    'onDidUpdateWidget callback of SignalWidget being called test',
-    (tester) => didUpdateWidgetCalledTest(tester),
-  );
-  testWidgets(
-    'onDidChangeDependencies callback of SignalWidget being called test',
-    (tester) => didChangeDependenciesCalledTest(tester),
-  );
-
-  testWidgets(
-    'onDidUpdateWidget signals of SignalWidget being reconfigured properly',
-        (tester) => multiSignalReconnectionOnDidUpdateWidgetTest(tester),
-  );
-
-  testWidgets(
-    'onDidUpdateWidget signal of SignalWidget being reconfigured properly',
-        (tester) => singleSignalReconnectionOnDidUpdateWidgetTest(tester),
   );
 }
 
@@ -104,70 +84,6 @@ Future<void> deactivateCalledTest(WidgetTester tester) async {
   await tester.tap(reparentButton);
   await tester.pump();
   expect(deactivateCalled, true);
-}
-
-Future<void> didUpdateWidgetCalledTest(WidgetTester tester) async {
-  await tester.pumpWidget(const SignalWidgetTest());
-  final updateWidgetButton = find.byKey(const ValueKey('updateWidgetButton'));
-  await tester.tap(updateWidgetButton);
-  await tester.pump();
-  expect(didUpdateWidgetCalled, true);
-}
-
-Future<void> didChangeDependenciesCalledTest(WidgetTester tester) async {
-  await tester.pumpWidget(const SignalWidgetTest());
-  final changeDependencyButton =
-      find.byKey(const ValueKey('changeDependencyButton'));
-  await tester.tap(changeDependencyButton);
-  await tester.pump();
-  expect(didChangeDependenciesCalled, true);
-}
-
-Future<void> multiSignalReconnectionOnDidUpdateWidgetTest(WidgetTester tester) async {
-  await tester.pumpWidget(const SignalWidgetTest());
-
-  expect(SignalTester(signalOne).slots().length, 1, reason: 'Expected signalOne to have exactly one slot connected before test');
-  expect(SignalTester(signalTwo).slots().length, 1, reason: 'Expected signalTwo to have exactly one slot connected before test');
-  expect(SignalTester(signalThree).slots().length, 0, reason: 'Expected signalThree to have no slot connected before test');
-
-  final multiSignalReconnectionButton = find.byKey(const ValueKey('multiSignalReconnectionButton'));
-  await tester.tap(multiSignalReconnectionButton);
-  await tester.pump();
-
-  expect(SignalTester(signalOne).isThereSlotToBeRemoved(), true, reason: 'Expected signalOne to have one slot to be removed');
-  expect(SignalTester(signalTwo).isThereSlotToBeRemoved(), false, reason: 'Expected signalTwo to have no slot to be removed');
-  expect(SignalTester(signalThree).isThereSlotToBeRemoved(), false, reason: 'Expected signalThree to have no slot to be removed');
-  expect(SignalTester(signalThree).isThereSlotTobeAdded(), true, reason: 'Expected signalThree to have one slot to be added');
-
-  expect(SignalTester(signalOne).slots().length, 0, reason: 'Expected signalOne to have no slots since it is no more in slot set');
-  expect(SignalTester(signalTwo).slots().length, 1, reason: 'Expected signalTwo to have exactly one slot since it is still in slot set');
-  expect(SignalTester(signalThree).slots().length, 1, reason: 'Expected signalThree to have exactly one slot connected since it is now in slot set');
-}
-
-Future<void> singleSignalReconnectionOnDidUpdateWidgetTest(WidgetTester tester) async {
-  await tester.pumpWidget(const SignalWidgetTest());
-  expect(SignalTester(singleSignalOne).slots().length, 1, reason: 'Expected singleSignalOne to have exactly one slot connected before test');
-  expect(SignalTester(singleSignalTwo).slots().length, 0, reason: 'Expected singleSignalTwo to have no slot connected before test');
-
-  final singleSignalReconnectionButton = find.byKey(const ValueKey('singleSignalReconnectionButton'));
-  await tester.tap(singleSignalReconnectionButton);
-  await tester.pump();
-
-  expect(SignalTester(singleSignalOne).isThereSlotToBeRemoved(), true, reason: 'Expected singleSignalOne to have one slot to be removed');
-  expect(SignalTester(singleSignalTwo).isThereSlotTobeAdded(), true, reason: 'Expected singleSignalTwo to have one slot to be added');
-
-  expect(SignalTester(singleSignalOne).slots().length, 0, reason: 'Expected singleSignalOne to have no slot connected after didUpdateWidget called');
-  expect(SignalTester(singleSignalTwo).slots().length, 1, reason: 'Expected singleSignalTwo to have exactly one slot after didUpdateWidget called');
-
-  final singleSignalNoReconnectionButton = find.byKey(const ValueKey('singleSignalNoReconnectionButton'));
-  await tester.tap(singleSignalNoReconnectionButton);
-  await tester.pump();
-
-  // Absolutely nothing should change now. Let's test.
-  expect(SignalTester(singleSignalOne).isThereSlotTobeAdded(), false, reason: 'Expected singleSignalOne to have no slot to be added');
-  expect(SignalTester(singleSignalOne).isThereSlotToBeRemoved(), false, reason: 'Expected singleSignalOne to have no slot to be removed');
-  expect(SignalTester(singleSignalTwo).isThereSlotTobeAdded(), false, reason: 'Expected singleSignalTwo to have no slot to be added');
-  expect(SignalTester(singleSignalTwo).isThereSlotToBeRemoved(), false, reason: 'Expected singleSignalTwo to have no slot to be removed');
 }
 
 Future<void> _createAndDisposeSignalWidget(tester) async {
