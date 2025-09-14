@@ -2,5 +2,5 @@
 /// entities.
 
 library signal;
-export 'package:flutter_signal/src/signal.dart' hide SignalTester;
+export 'package:flutter_signal/src/signal.dart';
 

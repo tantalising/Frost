@@ -1,5 +1,4 @@
 import 'slot_store.dart';
-import 'package:flutter/material.dart';
 
 /// Signals help you to establish connections between two entities.
 ///
@@ -55,11 +54,16 @@ typedef Slot = void;
 
 /// The Signal class offering all the signal features.
 class Signal {
-  final _slotSet = SlotStore();
+  final _slotStore = SlotStore();
 
   /// in built connect function for object flavoured usage.
   void connect(Function slot) {
     _connect(this, slot);
+  }
+
+  /// in built multi connect for object flavoured usage.
+  void multiConnect(List<Function> slots) {
+    _multiConnect(this, slots);
   }
 
   /// in built disconnect function for object flavoured usage.
@@ -72,7 +76,7 @@ class Signal {
   /// If an argument is provided but the slot doesn't take one,
   /// then the argument is discarded and the slot is still called.
   void call<T>([T? argument]) {
-    _slotSet.sync(); // See the SlotStore class docs for explanation
+    _slotStore.sync(); // See the SlotStore class docs for explanation
     _emit<T>(this, argument);
   }
 }
@@ -82,7 +86,18 @@ const _connect = connect;
 /// free floating connect function. Use it to connect a signal
 /// to a slot.
 void connect(Signal signal, Function slot) {
-  signal._slotSet.add(slot);
+  signal._slotStore.add(slot);
+}
+
+const _multiConnect = multiConnect;
+
+/// free floating multi connect function. Use it to connect a list of slots
+/// to a signal.
+/// The speciality of this function is that the slots are guaranteed to be called
+/// in order. That is, if the list looks like {a,b,c}, slot 'a' will be called first,
+/// then 'b' and so on.
+void multiConnect(Signal signal, List<Function> slots) {
+  signal._slotStore.addMultiSlot(slots);
 }
 
 const _disconnect = disconnect;
@@ -90,16 +105,10 @@ const _disconnect = disconnect;
 /// free floating disconnect function. Use to disconnect a signal
 /// from a slot.
 void disconnect(Signal signal, Function slot) {
-  signal._slotSet.remove(slot);
+  signal._slotStore.remove(slot);
 }
 
 /*----------------------- private -------------------------------*/
-
-// Just for a better looking assert.
-// Function type doesn't provide much info regarding signature.
-// Stricter types can't be used for some reason I don't remember.
-const _signalSignature = true;
-const _slotSignature = false;
 
 String _showError<T>(Function slot, [T? argument]) {
   final calledWithArgument = argument != null;
@@ -155,47 +164,15 @@ void _emit<T>(Signal signal, [T? argument]) {
 }
 
 void _callSlots(Signal signal) {
-  for (final slot in signal._slotSet.slots()) {
-    try {
-      slot();
-    } on Error {
-      assert(_signalSignature == _slotSignature, _showError(slot));
-    }
-  }
+  final (signatureMismatchedForSomeSlots: mismatched, slot: mismatchedSlot) =
+      signal._slotStore.callSlots();
+
+  assert(!mismatched, _showError(mismatchedSlot!));
 }
 
 void _callSlotsWithArgument<T>(Signal signal, T argument) {
-  for (final slot in signal._slotSet.slots()) {
-    try {
-      slot(argument);
-    } on Error {
-      try {
-        slot(); // In case the user chose to ignore the argument. Signal passes an argument but this particular slot doesn't need it.
-      } on NoSuchMethodError {
-        assert(_signalSignature == _slotSignature, _showError(slot, argument));
-      }
-    }
-  }
-}
+  final (signatureMismatchedForSomeSlots: mismatched, slot: mismatchedSlot) =
+      signal._slotStore.callSlotsWithArgument(argument);
 
-@visibleForTesting
-class SignalTester {
-  final Signal signal;
-  SignalTester(this.signal);
-
-  Iterable<Function> slots() {
-    final slotSet = signal._slotSet;
-    slotSet.sync();
-    return slotSet.slots();
-  }
-
-  bool isThereSlotToBeRemoved() {
-    final accessor = SlotSetInternalAccessor(signal._slotSet);
-    return accessor.slotsTobeRemoved().isNotEmpty;
-  }
-
-  bool isThereSlotTobeAdded() {
-    final accessor = SlotSetInternalAccessor(signal._slotSet);
-    return accessor.slotsTobeAdded().isNotEmpty;
-  }
+  assert(!mismatched, _showError(mismatchedSlot!, argument));
 }

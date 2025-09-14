@@ -7,16 +7,18 @@ void main() {
     test("emission test", testEmission);
     test("disconnection test", testDisconnection);
     test("emission with argument test", testArgument);
+    test("multiple connection test", testMultiConnection);
   });
 
   group("signal methods test", () {
     test("connection test", testConnectionMethod);
     test("disconnection test", testDisconnectionMethod);
+    test("multiple connection test", testMultiConnectionMethod);
   });
 }
 
-
 final signalTestValueChanged = Signal();
+
 class SignalTest {
   late int _value;
   int numberOfTimesSlotCalled = 0;
@@ -27,6 +29,11 @@ class SignalTest {
     _value = newValue;
     signalTestValueChanged();
   }
+
+  void resetNumberOfTimesSlotCalled() {
+    numberOfTimesSlotCalled = 0;
+  }
+
   int get value => _value;
   Slot signalEmitted() {
     numberOfTimesSlotCalled++;
@@ -46,6 +53,25 @@ void testConnection() {
   connect(signalTestValueChanged, signalTest.signalEmitted);
   signalTest.value++;
   expect(1, signalTest.numberOfTimesSlotCalled);
+}
+
+void testMultiConnection() {
+  final signalTests = [
+    SignalTest(0),
+    SignalTest(0),
+    SignalTest(0),
+    SignalTest(0)
+  ];
+  final signals = List.generate(signalTests.length, (int index) => signalTests[index].signalEmitted);
+
+  multiConnect(signalTestValueChanged, signals);
+  for (var signalTest in signalTests) {
+    signalTest.value++;
+    expect(1, signalTest.numberOfTimesSlotCalled);
+    for (var signalTest in signalTests) {
+      signalTest.resetNumberOfTimesSlotCalled();
+    }
+  }
 }
 
 void testEmission() {
@@ -83,6 +109,25 @@ void testConnectionMethod() {
   expect(1, signalTest.numberOfTimesSlotCalled);
 }
 
+void testMultiConnectionMethod() {
+  final signalTests = [
+    SignalTest(0),
+    SignalTest(0),
+    SignalTest(0),
+    SignalTest(0)
+  ];
+  final signals = List.generate(signalTests.length, (int index) => signalTests[index].signalEmitted);
+
+  signalTestValueChanged.multiConnect(signals);
+  for (var signalTest in signalTests) {
+    signalTest.value++;
+    expect(1, signalTest.numberOfTimesSlotCalled);
+    for (var signalTest in signalTests) {
+      signalTest.resetNumberOfTimesSlotCalled();
+    }
+  }
+}
+
 void testDisconnectionMethod() {
   final signalTest = SignalTest(0);
   signalTestValueChanged.connect(signalTest.signalEmitted);
@@ -94,7 +139,3 @@ void testDisconnectionMethod() {
   expect(2, signalTest.value);
   expect(1, signalTest.numberOfTimesSlotCalled);
 }
-
-
-
-
