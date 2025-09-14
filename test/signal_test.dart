@@ -1,5 +1,5 @@
 import 'package:test/test.dart';
-import 'package:flutter_signal/signal.dart';
+import 'package:frost/signal.dart';
 
 void main() {
   group("signal test", () {

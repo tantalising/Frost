@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_signal/signal_widget.dart';
+import 'package:frost/signal_widget.dart';
 
 class SignalWidgetReparentTestPage extends StatelessWidget {
   const SignalWidgetReparentTestPage({super.key});

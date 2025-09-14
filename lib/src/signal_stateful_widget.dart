@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_signal/signal.dart';
+import 'package:frost/signal.dart';
 
 /// A widget that automatically rebuilds whenever one of the signals
 /// in [SignalStateFulWidget.signals] is emitted.

@@ -142,7 +142,7 @@ String _showError<T>(Function slot, [T? argument]) {
   }
 
   final slotMessage = slotMessages(calledWithArgument);
-  final message = '\n\nflutter_signal: Signal was emitted $argumentMessage.\n'
+  final message = '\n\nfrost: Signal was emitted $argumentMessage.\n'
       'Slot \'$slot\' which was connected to this signal could not be called.\n'
       'One of the following cases may have occurred: \n\n'
       '\t1. Expected argument type does not match with the provided one.\n'

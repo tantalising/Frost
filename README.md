@@ -1,11 +1,11 @@
-# Flutter Signal
-Flutter signal provides a mechanism for communication between two entities. It is primarily
+# Frost
+Frost provides a mechanism for communication between two entities. It is primarily
 meant to be used as a state management solution. Although Signal is a simple and powerful way for
 managing states, it is not limited to state management only.
 
 ## Installation
 ```dart
-flutter pub add flutter_signal
+flutter pub add frost
 ```
 
 ## Contents:
@@ -36,7 +36,7 @@ flutter pub add flutter_signal
 Use [SignalModel] to create the data for your app. We will create a counter app.
 
 ```dart
-import 'package:flutter_signal/signal_model.dart';
+import 'package:frost/signal_model.dart';
 class CountModel extends SignalModel {
      void incrementCount() {
        _counter++;
@@ -75,7 +75,7 @@ Fetch your model using [ModelStore.get] method which returns
 a model of the given type or null if none found.
 
 ```dart
-    import 'package:flutter_signal/signal_widget.dart';
+    import 'package:frost/signal_widget.dart';
     SignalWidget(
       signal: CountModel.countChanged,
       model: CountModel(), // <-- provide the model so that we can get it using model store
@@ -146,7 +146,7 @@ Now use it as follows:
 Since the data is too small we can use [Property] to create our model.
 
 ```dart
-import 'package:flutter_signal/property.dart';
+import 'package:frost/property.dart';
 final _count = 0.property;
 // final _count = Property(0); or like this as well.
 ```

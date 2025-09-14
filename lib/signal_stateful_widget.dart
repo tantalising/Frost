@@ -3,5 +3,5 @@
 
 library signal_stateful_widget;
 
-export 'package:flutter_signal/src/signal_stateful_widget.dart';
+export 'package:frost/src/signal_stateful_widget.dart';
 

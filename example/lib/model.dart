@@ -1,4 +1,4 @@
-import 'package:flutter_signal/signal_model.dart';
+import 'package:frost/signal_model.dart';
 
 class CountModel extends SignalModel {
   static final countChanged = Signal();

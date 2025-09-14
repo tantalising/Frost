@@ -2,5 +2,5 @@
 
 library signal_model;
 
-export 'package:flutter_signal/src/signal_model.dart';
-export 'package:flutter_signal/src/signal.dart';
+export 'package:frost/src/signal_model.dart';
+export 'package:frost/src/signal.dart';

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_signal/property_widget.dart';
+import 'package:frost/property_widget.dart';
 
 final count = 0.property;
 final anotherCount = 5.property;

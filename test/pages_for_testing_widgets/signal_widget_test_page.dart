@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_signal/model_store.dart';
-import 'package:flutter_signal/signal_model.dart';
-import 'package:flutter_signal/signal_widget.dart';
+import 'package:frost/model_store.dart';
+import 'package:frost/signal_model.dart';
+import 'package:frost/signal_widget.dart';
 
 bool disposeCalled = false;
 class CountModel extends SignalModel {

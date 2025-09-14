@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../signal.dart';
+import 'signal.dart';
 import 'property.dart';
 
 /// An Widget that accepts a property and automatically rebuilds
