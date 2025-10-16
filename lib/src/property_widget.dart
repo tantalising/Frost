@@ -88,9 +88,6 @@ class PropertyWidget<T extends Object> extends StatefulWidget {
 class _PropertyWidgetState<T extends Object> extends State<PropertyWidget<T>> {
   @override
   void initState() {
-
-    assert(widget.property != null || widget.properties != null,
-        'PropertyWidget: Provide value for at least one of property or properties parameter');
     widget.property?.changed.connect(_rebuild);
     widget.properties?.forEach((property) {
       property.changed.connect(_rebuild);
@@ -116,6 +113,8 @@ class _PropertyWidgetState<T extends Object> extends State<PropertyWidget<T>> {
   }
 
   Slot _rebuild() {
-    setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
   }
 }
