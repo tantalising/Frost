@@ -1,6 +1,6 @@
 /// Signal model is the interface for your models.
 
-library signal_model;
+library;
 
 export 'package:frost/src/signal_model.dart';
 export 'package:frost/src/signal.dart';

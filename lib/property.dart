@@ -1,5 +1,5 @@
 /// Provides property functionality.
 
-library property;
+library;
 
 export 'package:frost/src/property.dart';
