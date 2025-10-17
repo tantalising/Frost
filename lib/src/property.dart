@@ -1,3 +1,5 @@
+import 'package:frost/src/property_widget_helpers/auto_property_manager.dart';
+
 import 'signal.dart';
 
 /// Class implementing property functionality.
@@ -23,7 +25,15 @@ class Property<T extends Object> {
   }
 
   ///Returns the value of the property.
-  T get value => _value;
+  T get value {
+    final manager = AutoPropertyManager();
+
+    for (final subscriber in manager.subscribers()) {
+      final repo = manager.getRepo(subscriber);
+      repo?.add(this);
+    }
+    return _value;
+  }
 
   /// Sets the value of the property.
   set value(T newValue) {

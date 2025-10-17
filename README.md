@@ -155,7 +155,6 @@ Use [PropertyWidget] for using this property in your app.
 
 ```dart
     PropertyWidget(
-      property: _count,
       builder: (_) => Text(
         _count.value.toString(),
       ),
@@ -197,10 +196,6 @@ bigValue.update((value) {
   value.valueFieldOne = intValue;
 })
 ```
-> [!Note]:
-> To update the ui when more than one property changes,
-> use the properties argument which takes a set of properties instead of one property.
-
 That's all we need for state management! Now read the tips(they are interesting!) and if you want to know more 
 about signals, check the [Detailed Explanation of Signals](#detailed-explanation-of-signals) section.
 

@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:frost/src/property_widget_helpers/auto_property_manager.dart';
 import 'signal.dart';
 import 'property.dart';
 
-/// An Widget that accepts a property and automatically rebuilds
+/// An Widget that accepts a builder that uses property and automatically rebuilds
 /// when the property is changed by setting [Property.value] or
 /// calling [Property.update] method or the [Property.changed]
 /// signal is emitted by the user.
-///
-/// The type is used to verify that the property supplied indeed is
-/// the right one. Since multiple properties can have different types,
-/// there's no need to specify type in that case.
 ///
 /// Let us assume you need a property for a count. You can create the
 /// property in the following way:
@@ -21,10 +18,8 @@ import 'property.dart';
 /// when the count changes, you can use the PropertyWidget:
 /// ```dart
 ///      PropertyWidget(
-///          property: _count,
 ///          builder: (context) => Text(
 ///          _count.value.toString(),
-///          style: Theme.of(context).textTheme.headlineMedium,
 ///          ),
 ///         ),
 /// ```
@@ -59,10 +54,10 @@ import 'property.dart';
 /// If you just update the value directly, the property widget
 /// won't update the ui unless you emit the [Property.changed] signal as well.
 class PropertyWidget extends StatefulWidget {
-  /// The builder for the widget that uses the property.
+  /// The builder for the widget that uses property inside itself.
   final Widget Function(BuildContext context) builder;
 
-  /// The property that the builder uses. Use when connecting only one property.
+  /// Optional property that when changed rebuilds the widget. Use when connecting only one property.
   final Property? property;
 
   /// Field for connecting to multiple properties.
@@ -91,7 +86,7 @@ class _PropertyWidgetState extends State<PropertyWidget> {
     for (final property in properties()) {
       property.changed.connect(rebuild);
     }
-
+    AutoPropertyManager().openRepo(widget, rebuild);
     widget.onInit?.call();
     super.initState();
   }
@@ -101,14 +96,17 @@ class _PropertyWidgetState extends State<PropertyWidget> {
     for (final property in properties()) {
       property.changed.connect(rebuild);
     }
-
+    AutoPropertyManager().closeRepo(widget);
     widget.onDispose?.call();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return widget.builder(context);
+    AutoPropertyManager().subscribe(widget);
+    final widgetTree = widget.builder(context);
+    AutoPropertyManager().unsubscribe(widget);
+    return widgetTree;
   }
 
   Slot rebuild() {

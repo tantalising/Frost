@@ -1,9 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:frost/property_widget.dart';
+import 'package:frost/signal.dart';
 
 final count = 0.property;
 final anotherCount = 5.property;
 final yetAnotherCount = 10.property;
+
+//these properties are kept in sync. in the widget we cannot directly use
+// the properties because they will be automatically connected to rebuild.
+//here we testing if externally supplied properties are triggering rebuild.
+//so we need to read their values in an indirect way.
+
+var count_mirror = 0;
+var anotherCount_mirror = 5;
+var yetAnotherCount_mirror = 10;
+
 
 var initCalled = false;
 var disposeCalled = false;
@@ -15,29 +26,18 @@ class PropertyWidgetTest extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(),
     );
   }
 }
 
 class MyHomePage extends StatelessWidget {
-  const MyHomePage({super.key, required this.title});
-  final String title;
+  const MyHomePage({super.key});
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(title),
-      ),
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const Text(
               'You have pushed the button this many times:',
@@ -47,14 +47,20 @@ class MyHomePage extends StatelessWidget {
               onDispose: () => disposeCalled = true,
               property: count,
               builder: (context) => Text(
-                count.value.toString(),
+                "$count_mirror",
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
             ),
             PropertyWidget(
+              onInit: () {
+                //we have to connect the mirror variables somewhere. this seems to be a nice place.
+                connect(count.changed, () => count_mirror = count.value);
+                connect(anotherCount.changed, () => anotherCount_mirror = anotherCount.value);
+                connect(yetAnotherCount.changed, () => yetAnotherCount_mirror = yetAnotherCount.value);
+              },
               properties: {anotherCount, yetAnotherCount},
-              builder: (_) => Text("The another count is ${anotherCount.value.toString()}"
-                  " and the yet another count is ${yetAnotherCount.value.toString()}"),
+              builder: (_) => Text("The another count is $anotherCount_mirror"
+                  " and the yet another count is $yetAnotherCount_mirror"),
             ),
             MaterialButton(
               key: const ValueKey('anotherCountButton'),
