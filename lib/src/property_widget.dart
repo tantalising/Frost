@@ -58,12 +58,12 @@ import 'property.dart';
 ///```
 /// If you just update the value directly, the property widget
 /// won't update the ui unless you emit the [Property.changed] signal as well.
-class PropertyWidget<T extends Object> extends StatefulWidget {
+class PropertyWidget extends StatefulWidget {
   /// The builder for the widget that uses the property.
   final Widget Function(BuildContext context) builder;
 
   /// The property that the builder uses. Use when connecting only one property.
-  final Property<T>? property;
+  final Property? property;
 
   /// Field for connecting to multiple properties.
   final Set<Property>? properties;
@@ -82,16 +82,15 @@ class PropertyWidget<T extends Object> extends StatefulWidget {
       this.onInit,
       this.onDispose});
   @override
-  State<PropertyWidget> createState() => _PropertyWidgetState<T>();
+  State<PropertyWidget> createState() => _PropertyWidgetState();
 }
 
-class _PropertyWidgetState<T extends Object> extends State<PropertyWidget<T>> {
+class _PropertyWidgetState extends State<PropertyWidget> {
   @override
   void initState() {
-    widget.property?.changed.connect(_rebuild);
-    widget.properties?.forEach((property) {
-      property.changed.connect(_rebuild);
-    });
+    for (final property in properties()) {
+      property.changed.connect(rebuild);
+    }
 
     widget.onInit?.call();
     super.initState();
@@ -99,10 +98,10 @@ class _PropertyWidgetState<T extends Object> extends State<PropertyWidget<T>> {
 
   @override
   void dispose() {
-    widget.property?.changed.disconnect(_rebuild);
-    widget.properties?.forEach((property) {
-      property.changed.disconnect(_rebuild);
-    });
+    for (final property in properties()) {
+      property.changed.connect(rebuild);
+    }
+
     widget.onDispose?.call();
     super.dispose();
   }
@@ -112,9 +111,17 @@ class _PropertyWidgetState<T extends Object> extends State<PropertyWidget<T>> {
     return widget.builder(context);
   }
 
-  Slot _rebuild() {
+  Slot rebuild() {
     if (mounted) {
       setState(() {});
     }
+  }
+
+  Set<Property> properties() {
+    final properties = widget.properties ?? {};
+    if (widget.property != null) {
+      properties.add(widget.property!);
+    }
+    return properties;
   }
 }
