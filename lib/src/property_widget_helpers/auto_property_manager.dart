@@ -1,5 +1,6 @@
 import 'auto_property_repository.dart';
 import '../../property_widget.dart';
+import 'weak_map.dart';
 
 // read the definitions carefully to understand this class better.
 // auto property: a property to which rebuild methods of subscribers should be
@@ -19,7 +20,7 @@ import '../../property_widget.dart';
 class AutoPropertyManager {
   static final AutoPropertyManager _instance =
       AutoPropertyManager._internal();
-  final _repositories = <PropertyWidget, AutoPropertyRepository>{};
+  final _repositories = WeakMap<PropertyWidget, AutoPropertyRepository>();
   final _subscribers = <PropertyWidget>{};
 
   AutoPropertyManager._internal();
