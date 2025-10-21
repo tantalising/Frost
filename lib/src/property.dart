@@ -1,4 +1,4 @@
-import 'package:frost/src/property_widget_helpers/auto_property_manager.dart';
+import 'package:frost/src/property_widget_helpers/subscription_manager.dart';
 
 import 'signal.dart';
 
@@ -26,11 +26,11 @@ class Property<T extends Object> {
 
   ///Returns the value of the property.
   T get value {
-    final manager = AutoPropertyManager();
+    final manager = SubscriptionManager();
 
     for (final subscriber in manager.subscribers()) {
       final repo = manager.getRepo(subscriber);
-      repo?.add(this);
+      repo?.add(changed);
     }
     return _value;
   }

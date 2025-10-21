@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:frost/src/property_widget_helpers/auto_property_manager.dart';
+import 'package:frost/src/property_widget_helpers/subscription_manager.dart';
 import 'signal.dart';
 import 'property.dart';
 
@@ -91,7 +91,7 @@ class _PropertyWidgetState extends State<PropertyWidget> {
     for (final property in properties()) {
       property.changed.connect(rebuild);
     }
-    AutoPropertyManager().openRepo(this, rebuild);
+    SubscriptionManager().openRepo(this, rebuild);
     widget.onInit?.call();
     super.initState();
   }
@@ -101,16 +101,16 @@ class _PropertyWidgetState extends State<PropertyWidget> {
     for (final property in properties()) {
       property.changed.connect(rebuild);
     }
-    AutoPropertyManager().closeRepo(this);
+    SubscriptionManager().closeRepo(this);
     widget.onDispose?.call();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    AutoPropertyManager().subscribe(this);
+    SubscriptionManager().subscribe(this);
     final widgetTree = widget.builder(context);
-    AutoPropertyManager().unsubscribe(this);
+    SubscriptionManager().unsubscribe(this);
     return widgetTree;
   }
 
