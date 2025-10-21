@@ -88,7 +88,7 @@ class _PropertyWidgetState extends State<PropertyWidget> {
     for (final property in properties()) {
       property.changed.connect(rebuild);
     }
-    AutoPropertyManager().openRepo(widget, rebuild);
+    AutoPropertyManager().openRepo(this, rebuild);
     widget.onInit?.call();
     super.initState();
   }
@@ -98,16 +98,16 @@ class _PropertyWidgetState extends State<PropertyWidget> {
     for (final property in properties()) {
       property.changed.connect(rebuild);
     }
-    AutoPropertyManager().closeRepo(widget);
+    AutoPropertyManager().closeRepo(this);
     widget.onDispose?.call();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    AutoPropertyManager().subscribe(widget);
+    AutoPropertyManager().subscribe(this);
     final widgetTree = widget.builder(context);
-    AutoPropertyManager().unsubscribe(widget);
+    AutoPropertyManager().unsubscribe(this);
     return widgetTree;
   }
 
