@@ -34,12 +34,10 @@ class AutoPropertyManager {
   }
 
   void subscribe(PropertyWidget widget) {
-    if (_subscribers.contains(widget)) return;
     _subscribers.add(widget);
   }
 
   void unsubscribe(PropertyWidget widget) {
-    if (_subscribers.contains(widget)) return;
     _subscribers.remove(widget);
   }
 
@@ -52,7 +50,6 @@ class AutoPropertyManager {
   }
 
   void closeRepo(PropertyWidget subscriber) {
-    if (_repositories.containsKey(subscriber)) return;
     final repo = _repositories.remove(subscriber);
     repo?.clear();
   }

@@ -182,7 +182,7 @@ class _TwoKeyTypeMap<S extends Object, T extends Object, V extends Object> {
     secondTypeMap.clear();
   }
 
-  bool _keyTypeNeitherSorT<Key extends Object>(Key key) {
+  bool _keyTypeNeitherSorT<K extends Object>(K key) {
     final bounded = key is S || key is T;
     return !bounded;
   }
