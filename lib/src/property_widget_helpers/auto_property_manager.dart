@@ -21,7 +21,8 @@ class AutoPropertyManager {
   static final AutoPropertyManager _instance =
       AutoPropertyManager._internal();
   final _repositories = WeakMap<PropertyWidget, AutoPropertyRepository>();
-  final _subscribers = <PropertyWidget>{};
+  final _currentSubscribers = <PropertyWidget>{};
+  final _alreadyTrackedSubscribers = <PropertyWidget>{};
 
   AutoPropertyManager._internal();
   factory AutoPropertyManager() {
@@ -34,15 +35,17 @@ class AutoPropertyManager {
   }
 
   void subscribe(PropertyWidget widget) {
-    _subscribers.add(widget);
+    if (_alreadyTrackedSubscribers.contains(widget)) return;
+    _currentSubscribers.add(widget);
+    _alreadyTrackedSubscribers.add(widget);
   }
 
   void unsubscribe(PropertyWidget widget) {
-    _subscribers.remove(widget);
+    _currentSubscribers.remove(widget);
   }
 
   Set<PropertyWidget> subscribers() {
-    return Set.unmodifiable(_subscribers);
+    return Set.unmodifiable(_currentSubscribers);
   }
 
   AutoPropertyRepository? getRepo(PropertyWidget widget) {

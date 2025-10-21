@@ -69,13 +69,15 @@ class PropertyWidget extends StatefulWidget {
   /// A callback which does some work when the widget is disposed.
   final VoidCallback? onDispose;
 
+  final String debugString;
+
   const PropertyWidget(
       {super.key,
       this.property,
       this.properties,
       required this.builder,
       this.onInit,
-      this.onDispose});
+      this.onDispose, required this.debugString});
   @override
   State<PropertyWidget> createState() => _PropertyWidgetState();
 }

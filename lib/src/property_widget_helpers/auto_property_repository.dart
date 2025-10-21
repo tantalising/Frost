@@ -4,6 +4,9 @@ class AutoPropertyRepository {
   final _properties = <Property>{};
   final Function rebuild;
 
+  //remove this
+  Set<Property> get properties => _properties;
+
   AutoPropertyRepository(this.rebuild);
 
   void add<T extends Object>(Property<T> property) {
