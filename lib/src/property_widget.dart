@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:frost/src/property_widget_helpers/auto_property_manager.dart';
 import 'signal.dart';
 import 'property.dart';
@@ -83,6 +84,8 @@ class PropertyWidget extends StatefulWidget {
 }
 
 class _PropertyWidgetState extends State<PropertyWidget> {
+  bool _rebuildScheduled = false;
+
   @override
   void initState() {
     for (final property in properties()) {
@@ -112,9 +115,17 @@ class _PropertyWidgetState extends State<PropertyWidget> {
   }
 
   Slot rebuild() {
-    if (mounted) {
-      setState(() {});
-    }
+    if (_rebuildScheduled) return;
+
+    _rebuildScheduled = true;
+    SchedulerBinding.instance.addPostFrameCallback(
+        (_) {
+          if (mounted) {
+            setState(()=>());
+          }
+        }
+    );
+    _rebuildScheduled = false;
   }
 
   Set<Property> properties() {
