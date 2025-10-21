@@ -1,11 +1,8 @@
 import '../../signal.dart';
 
 class Subscription {
-  final _signals = <Signal>{};
   final Function rebuild;
-
- //remove this
-  Set<Signal> get signals => _signals;
+  final _signals = <Signal>{};
 
   Subscription(this.rebuild);
 
@@ -22,4 +19,3 @@ class Subscription {
     _signals.clear();
   }
 }
-

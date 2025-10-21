@@ -29,8 +29,8 @@ class Property<T extends Object> {
     final manager = SubscriptionManager();
 
     for (final subscriber in manager.subscribers()) {
-      final repo = manager.getRepo(subscriber);
-      repo?.add(changed);
+      final subscriptions = manager.subscription(subscriber);
+      subscriptions?.add(changed);
     }
     return _value;
   }

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:frost/src/property_widget_helpers/subscription_manager.dart';
 import 'signal.dart';
 import 'property.dart';
@@ -70,28 +69,24 @@ class PropertyWidget extends StatefulWidget {
   /// A callback which does some work when the widget is disposed.
   final VoidCallback? onDispose;
 
-  final String debugString;
-
   const PropertyWidget(
       {super.key,
       this.property,
       this.properties,
       required this.builder,
       this.onInit,
-      this.onDispose, required this.debugString});
+      this.onDispose});
   @override
   State<PropertyWidget> createState() => _PropertyWidgetState();
 }
 
 class _PropertyWidgetState extends State<PropertyWidget> {
-  bool _rebuildScheduled = false;
-
   @override
   void initState() {
     for (final property in properties()) {
       property.changed.connect(rebuild);
     }
-    SubscriptionManager().openRepo(this, rebuild);
+    SubscriptionManager().subscribe(this, rebuild);
     widget.onInit?.call();
     super.initState();
   }
@@ -101,31 +96,23 @@ class _PropertyWidgetState extends State<PropertyWidget> {
     for (final property in properties()) {
       property.changed.connect(rebuild);
     }
-    SubscriptionManager().closeRepo(this);
+    SubscriptionManager().unsubscribe(this);
     widget.onDispose?.call();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    SubscriptionManager().subscribe(this);
+    SubscriptionManager().startTracking(this);
     final widgetTree = widget.builder(context);
-    SubscriptionManager().unsubscribe(this);
+    SubscriptionManager().stopTracking(this);
     return widgetTree;
   }
 
   Slot rebuild() {
-    if (_rebuildScheduled) return;
-
-    _rebuildScheduled = true;
-    SchedulerBinding.instance.addPostFrameCallback(
-        (_) {
-          if (mounted) {
-            setState(()=>());
-          }
-        }
-    );
-    _rebuildScheduled = false;
+    if (mounted) {
+      setState(()=>());
+    }
   }
 
   Set<Property> properties() {
