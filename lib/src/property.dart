@@ -1,3 +1,4 @@
+import 'package:frost/property_widget.dart';
 import 'package:frost/src/property_widget_helpers/subscription_manager.dart';
 
 import 'signal.dart';
@@ -17,7 +18,7 @@ class Property<T extends Object> {
   /// connect to this signal an appropriate slot.
   /// Don't forget to disconnect the slot when not needed anymore.
 
-  /// See the [PropertyWidget] for usage examples.
+  /// See the [Watcher] for usage examples.
   final changed = Signal();
 
   Property(T value) {
