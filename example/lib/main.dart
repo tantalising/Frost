@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:frost/signal_widget.dart';
+import 'package:frost/signal.dart';
+import 'package:frost/watcher.dart';
 import 'package:frost/model_store.dart';
 import 'model.dart';
 
@@ -8,6 +9,7 @@ Slot doSomething() {
 }
 
 void main() {
+  ModelStore.add(() => CountModel());
   connect(CountModel.countChanged, doSomething);
   runApp(const MyApp());
 }
@@ -47,10 +49,9 @@ class MyHomePage extends StatelessWidget {
             const Text(
               'You have pushed the button this many times:',
             ),
-            SignalWidget(
+            Watcher(
               signal: CountModel.countChanged,
-              model: CountModel(),
-              builder: (context) => Text(
+              watch: (context) => Text(
                 ModelStore.get<CountModel>()!.count.toString(),
                 style: Theme.of(context).textTheme.headlineMedium,
               ),

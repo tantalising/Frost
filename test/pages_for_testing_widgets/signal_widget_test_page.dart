@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frost/model_store.dart';
 import 'package:frost/signal_model.dart';
-import 'package:frost/signal_widget.dart';
+import 'package:frost/watcher.dart';
 
 bool disposeCalled = false;
 class CountModel extends SignalModel {
@@ -56,6 +56,7 @@ class SignalWidgetTest extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    ModelStore.add(()=>CountModel());
     return const MaterialApp(
       home: MyHomePage(title: 'Test Page'),
     );
@@ -89,22 +90,21 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       body: Column(
         children: [
-          SignalWidget(
+          Watcher(
             onInit: () => CountModel.get.initCalled = true,
             onDispose: () => disposeCalled = true,
             signal: CountModel.countChanged,
-            model: CountModel(),
-            builder: (context) => Text(
+            watch: (context) => Text(
               CountModel.get.count.toString(),
             ),
           ),
-          SignalWidget<CountModel>(
+          Watcher(
             signals: {
               CountModel.anotherCountChanged,
               CountModel.yetAnotherCountChanged
             },
             // only one floating button so place other buttons here
-            builder: (_) => Column(
+            watch: (_) => Column(
               children: [
                 Text(CountModel.get.anotherCount.toString()),
                 Text(CountModel.get.yetAnotherCount.toString()),

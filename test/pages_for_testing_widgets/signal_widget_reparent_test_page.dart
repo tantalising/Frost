@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:frost/signal_widget.dart';
+import 'package:frost/signal.dart';
+import 'package:frost/watcher.dart';
 
 class SignalWidgetReparentTestPage extends StatelessWidget {
   const SignalWidgetReparentTestPage({super.key});
@@ -19,11 +20,11 @@ class ChildWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SignalWidget(
+    return Watcher(
       signal: Signal(),
       onDeactivate: () => deactivateCalled = true,
       onActivate: () => activateCalled = true,
-      builder: (BuildContext context) {
+      watch: (BuildContext context) {
         return const Text('test');
       },
     );
