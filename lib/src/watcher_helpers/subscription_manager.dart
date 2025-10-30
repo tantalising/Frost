@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart' show State;
+import '../../signal.dart';
 import 'subscription.dart';
 import '../../watcher.dart';
 
@@ -43,5 +44,15 @@ class SubscriptionManager {
   void unsubscribe(Subscriber subscriber) {
     final subscription = _subscriptions.remove(subscriber);
     subscription?.clear();
+  }
+
+ static T connectToSubscribersOf<T extends Object>(T value, Signal signal) {
+    final manager = SubscriptionManager();
+
+    for (final subscriber in manager.subscribers()) {
+      final subscriptions = manager.subscription(subscriber);
+      subscriptions?.add(signal);
+    }
+    return value;
   }
 }
