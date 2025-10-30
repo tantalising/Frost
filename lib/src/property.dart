@@ -1,5 +1,5 @@
 import 'package:frost/watcher.dart';
-import 'package:frost/src/property_widget_helpers/subscription_manager.dart';
+import 'package:frost/src/watcher_helpers/subscription_manager.dart';
 
 import 'signal.dart';
 
