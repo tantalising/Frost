@@ -10,6 +10,7 @@ class SubscriptionManager {
   final _subscriptions = WeakMap<Subscriber, Subscription>();
   final _currentSubscribers = <Subscriber>{};
   final _alreadyTrackedSubscribers = <Subscriber>{};
+  bool _tracking = false;
 
 
   SubscriptionManager._internal();
@@ -28,10 +29,13 @@ class SubscriptionManager {
     if (_alreadyTrackedSubscribers.contains(subscriber)) return;
     _currentSubscribers.add(subscriber);
     _alreadyTrackedSubscribers.add(subscriber);
+    _tracking = true;
   }
 
   void stopTracking(Subscriber subscriber) {
+    if (!_alreadyTrackedSubscribers.contains(subscriber)) return;
     _currentSubscribers.remove(subscriber);
+    _tracking = false;
   }
 
   Set<Subscriber> subscribers() {
@@ -48,6 +52,7 @@ class SubscriptionManager {
   }
 
 T connectToSubscribersOf<T extends Object>(T value, Signal signal) {
+    if (!_tracking) return value;
     final manager = SubscriptionManager();
     for (final subscriber in manager.subscribers()) {
       final subscriptions = manager.subscription(subscriber);
