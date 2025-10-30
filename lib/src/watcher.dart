@@ -71,6 +71,13 @@ class Watcher extends StatefulWidget {
   /// Optional Field for connecting to multiple signals.
   final Set<Signal>? signals;
 
+  /// A callback which is called when this widget is reinserted into the tree after having been
+  /// removed via deactivate method of the state object of this widget.
+  final VoidCallback? onActivate;
+
+  /// A callback which is called when the deactivate method of this widget's state is called.
+  final VoidCallback? onDeactivate;
+
   /// A callback which does some work when the widget is created.
   final VoidCallback? onInit;
 
@@ -84,6 +91,8 @@ class Watcher extends StatefulWidget {
       this.signal,
       this.signals,
       required this.watch,
+      this.onActivate,
+      this.onDeactivate,
       this.onInit,
       this.onDispose});
   @override
@@ -107,6 +116,18 @@ class _WatcherState extends State<Watcher> {
     SubscriptionManager().unsubscribe(this);
     widget.onDispose?.call();
     super.dispose();
+  }
+
+  @override
+  void deactivate() {
+    widget.onDeactivate?.call();
+    super.deactivate();
+  }
+
+  @override
+  void activate() {
+    widget.onActivate?.call();
+    super.activate();
   }
 
   @override
