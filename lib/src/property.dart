@@ -27,7 +27,7 @@ class Property<T extends Object> {
 
   ///Returns the value of the property.
   T get value {
-    return SubscriptionManager.connectToSubscribersOf(_value, changed);
+    return SubscriptionManager().connectToSubscribersOf(_value, changed);
   }
 
   /// Sets the value of the property.

@@ -7,12 +7,13 @@ import 'weak_map.dart';
 
 typedef Subscriber = State<Watcher>;
 class SubscriptionManager {
-  static final SubscriptionManager _instance =
-      SubscriptionManager._internal();
   final _subscriptions = WeakMap<Subscriber, Subscription>();
   final _currentSubscribers = <Subscriber>{};
   final _alreadyTrackedSubscribers = <Subscriber>{};
 
+
+  SubscriptionManager._internal();
+  static final SubscriptionManager _instance =
   SubscriptionManager._internal();
   factory SubscriptionManager() {
     return _instance;
@@ -46,9 +47,8 @@ class SubscriptionManager {
     subscription?.clear();
   }
 
- static T connectToSubscribersOf<T extends Object>(T value, Signal signal) {
+T connectToSubscribersOf<T extends Object>(T value, Signal signal) {
     final manager = SubscriptionManager();
-
     for (final subscriber in manager.subscribers()) {
       final subscriptions = manager.subscription(subscriber);
       subscriptions?.add(signal);
