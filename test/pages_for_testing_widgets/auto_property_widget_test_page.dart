@@ -27,8 +27,8 @@ class MyHomePage extends StatelessWidget {
             const Text(
               'You have pushed the button this many times:',
             ),
-            PropertyWidget(
-              builder: (_) => Text("The another count is ${anotherCount.value}"
+            Watcher(
+              watch: (_) => Text("The another count is ${anotherCount.value}"
                   " and the yet another count is ${yetAnotherCount.value}"),
             ),
             MaterialButton(

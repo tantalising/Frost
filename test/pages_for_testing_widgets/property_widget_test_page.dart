@@ -42,16 +42,16 @@ class MyHomePage extends StatelessWidget {
             const Text(
               'You have pushed the button this many times:',
             ),
-            PropertyWidget(
+            Watcher(
               onInit: () => initCalled = true,
               onDispose: () => disposeCalled = true,
               property: count,
-              builder: (context) => Text(
+              watch: (context) => Text(
                 "$count_mirror",
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
             ),
-            PropertyWidget(
+            Watcher(
               onInit: () {
                 //we have to connect the mirror variables somewhere. this seems to be a nice place.
                 connect(count.changed, () => count_mirror = count.value);
@@ -59,7 +59,7 @@ class MyHomePage extends StatelessWidget {
                 connect(yetAnotherCount.changed, () => yetAnotherCount_mirror = yetAnotherCount.value);
               },
               properties: {anotherCount, yetAnotherCount},
-              builder: (_) => Text("The another count is $anotherCount_mirror"
+              watch: (_) => Text("The another count is $anotherCount_mirror"
                   " and the yet another count is $yetAnotherCount_mirror"),
             ),
             MaterialButton(

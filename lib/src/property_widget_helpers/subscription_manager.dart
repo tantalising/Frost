@@ -4,7 +4,7 @@ import '../../property_widget.dart';
 
 import 'weak_map.dart';
 
-typedef Subscriber = State<PropertyWidget>;
+typedef Subscriber = State<Watcher>;
 class SubscriptionManager {
   static final SubscriptionManager _instance =
       SubscriptionManager._internal();
