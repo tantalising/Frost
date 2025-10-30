@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frost/property_widget.dart';
+import 'package:frost/watcher.dart';
 
 final anotherCount = 5.property;
 final yetAnotherCount = 10.property;

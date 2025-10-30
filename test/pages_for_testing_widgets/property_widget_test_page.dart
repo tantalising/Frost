@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frost/property_widget.dart';
+import 'package:frost/watcher.dart';
 import 'package:frost/signal.dart';
 
 final count = 0.property;

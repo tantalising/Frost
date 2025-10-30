@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart' show State;
 import 'subscription.dart';
-import '../../property_widget.dart';
+import '../../watcher.dart';
 
 import 'weak_map.dart';
 
