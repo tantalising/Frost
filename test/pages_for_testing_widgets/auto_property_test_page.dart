@@ -4,8 +4,8 @@ import 'package:frost/watcher.dart';
 final anotherCount = 5.property;
 final yetAnotherCount = 10.property;
 
-class AutoPropertyWidgetTest extends StatelessWidget {
-  const AutoPropertyWidgetTest({super.key});
+class AutoPropertyTest extends StatelessWidget {
+  const AutoPropertyTest({super.key});
 
   // This widget is the root of your application.
   @override

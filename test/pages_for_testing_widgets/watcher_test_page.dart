@@ -50,8 +50,8 @@ class CountModel extends SignalModel {
   }
 }
 
-class SignalWidgetTest extends StatelessWidget {
-  const SignalWidgetTest({super.key});
+class WatcherTest extends StatelessWidget {
+  const WatcherTest({super.key});
 
   // This widget is the root of your application.
   @override

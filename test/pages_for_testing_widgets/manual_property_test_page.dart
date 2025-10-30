@@ -19,8 +19,8 @@ var yetAnotherCount_mirror = 10;
 var initCalled = false;
 var disposeCalled = false;
 
-class PropertyWidgetTest extends StatelessWidget {
-  const PropertyWidgetTest({super.key});
+class ManualPropertyTest extends StatelessWidget {
+  const ManualPropertyTest({super.key});
 
   // This widget is the root of your application.
   @override

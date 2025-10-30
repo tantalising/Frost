@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'pages_for_testing_widgets/auto_property_widget_test_page.dart';
+import 'pages_for_testing_widgets/auto_property_test_page.dart';
 
 void main() {
   testWidgets(
@@ -14,7 +14,7 @@ Future<void> testPropertiesChangeTriggersRebuild(WidgetTester tester) async {
   final yetAnotherCountButton =
       find.byKey(const ValueKey('yetAnotherCountButton'));
 
-  await tester.pumpWidget(const AutoPropertyWidgetTest());
+  await tester.pumpWidget(const AutoPropertyTest());
 
   await tester.tap(anotherCountButton);
   await tester.pump();

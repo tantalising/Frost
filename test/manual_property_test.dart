@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'pages_for_testing_widgets/property_widget_test_page.dart';
+import 'pages_for_testing_widgets/manual_property_test_page.dart';
 
 void main() {
   testWidgets(
@@ -19,7 +19,7 @@ void main() {
 Future<void> testPropertyChangeTriggersRebuild(WidgetTester tester) async {
   final incrementButton = find.byKey(const ValueKey('incrementButton'));
 
-  await tester.pumpWidget(const PropertyWidgetTest());
+  await tester.pumpWidget(const ManualPropertyTest());
   await tester.tap(incrementButton);
   await tester.pump();
 
@@ -30,7 +30,7 @@ Future<void> testPropertiesChangeTriggersRebuild(WidgetTester tester) async {
   final anotherCountButton = find.byKey(const ValueKey('anotherCountButton'));
   final yetAnotherCountButton = find.byKey(const ValueKey('yetAnotherCountButton'));
 
-  await tester.pumpWidget(const PropertyWidgetTest());
+  await tester.pumpWidget(const ManualPropertyTest());
 
   await tester.tap(anotherCountButton);
   await tester.pump();
@@ -48,7 +48,7 @@ Future<void> testPropertiesChangeTriggersRebuild(WidgetTester tester) async {
 Future<void> testOnInitBeingCalled(WidgetTester tester) async {
   initCalled = false;
 
-  await tester.pumpWidget(const PropertyWidgetTest());
+  await tester.pumpWidget(const ManualPropertyTest());
   await tester.pump();
 
   expect(initCalled, true);
@@ -58,7 +58,7 @@ Future<void> testOnDisposeBeingCalled(WidgetTester tester) async {
   disposeCalled = false;
 
   // This somehow disposes
-  await tester.pumpWidget(const PropertyWidgetTest());
+  await tester.pumpWidget(const ManualPropertyTest());
   await tester.pumpAndSettle();
   await tester.pumpWidget(Container());
   await tester.pumpAndSettle();

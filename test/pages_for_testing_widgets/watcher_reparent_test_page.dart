@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:frost/signal.dart';
 import 'package:frost/watcher.dart';
 
-class SignalWidgetReparentTestPage extends StatelessWidget {
-  const SignalWidgetReparentTestPage({super.key});
+class WatcherReparentTestPage extends StatelessWidget {
+  const WatcherReparentTestPage({super.key});
 
   @override
   Widget build(BuildContext context) {
