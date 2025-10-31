@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frost/model_store.dart';
+import 'package:frost/store.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'pages_for_testing_widgets/watcher_reparent_test_page.dart';
 import 'pages_for_testing_widgets/watcher_test_page.dart';

@@ -2,5 +2,6 @@
 /// entities.
 
 library;
+
 export 'package:frost/src/signal.dart';
 

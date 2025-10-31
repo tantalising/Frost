@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:frost/model_store.dart';
+import 'package:frost/store.dart';
 
 import 'pages_for_testing_widgets/auto_signal_test_page.dart';
 

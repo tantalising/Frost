@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:frost/model_store.dart';
-import 'package:frost/signal_model.dart';
+import 'package:frost/signal.dart';
+import 'package:frost/store.dart';
+import 'package:frost/model.dart';
 import 'package:frost/watcher.dart';
 
 bool disposeCalled = false;

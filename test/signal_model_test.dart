@@ -1,4 +1,4 @@
-import 'package:frost/model_store.dart';
+import 'package:frost/model.dart';
 import 'package:frost/src/store.dart';
 import 'package:test/test.dart';
 

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frost/signal.dart';
 import 'package:frost/watcher.dart';
-import 'package:frost/model_store.dart';
+import 'package:frost/store.dart';
 import 'model.dart';
 
 Slot doSomething() {
