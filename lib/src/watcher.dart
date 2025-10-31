@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frost/src/watcher_helpers/subscription_manager.dart';
+import 'package:frost/src/subscription_manager/subscription_manager.dart';
 import 'signal.dart';
 import 'property.dart';
 

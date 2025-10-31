@@ -5,14 +5,14 @@ import 'package:frost/model_store.dart';
 import 'pages_for_testing_widgets/auto_signal_test_page.dart';
 
 void main() {
-  setUp(() => ModelStore.clear());
+  setUp(() => Store.clear());
   testWidgets(
       'Given builder with signal associated model data inside test whether the data change triggers rebuild',
       (tester) => signalEmissionTriggersRebuild(tester));
 }
 
 Future<void> signalEmissionTriggersRebuild(WidgetTester tester) async {
-  ModelStore.add(() => AutoSignalModel());
+  Store.add(() => AutoSignalModel());
   final countButton = find.byKey(const ValueKey('countButton'));
   final anotherCountButton =
       find.byKey(const ValueKey('anotherCountButton'));

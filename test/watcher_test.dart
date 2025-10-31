@@ -5,7 +5,7 @@ import 'pages_for_testing_widgets/watcher_reparent_test_page.dart';
 import 'pages_for_testing_widgets/watcher_test_page.dart';
 
 void main() {
-  setUp(() => ModelStore.clear()); // empty the store before every test.
+  setUp(() => Store.clear()); // empty the store before every test.
   testWidgets("signal widget test", (tester) => singleSignalTest(tester));
   testWidgets(
     "multiple signals widget test",

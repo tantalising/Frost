@@ -36,7 +36,7 @@ flutter pub add frost
 Use [SignalModel] to create the data for your app. We will create a counter app.
 
 ```dart
-import 'package:frost/signal_model.dart';
+import 'package:frost/model.dart';
 class CountModel extends SignalModel {
      void incrementCount() {
        _counter++;

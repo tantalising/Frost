@@ -4,7 +4,7 @@ import 'package:frost/signal_model.dart';
 import 'package:frost/watcher.dart';
 
 bool disposeCalled = false;
-class CountModel extends SignalModel {
+class CountModel extends Model {
   int _counter = 0;
   int _anotherCounter = 5;
   int _yetAnotherCounter = 10;
@@ -17,7 +17,7 @@ class CountModel extends SignalModel {
   static final yetAnotherCountChanged = Signal();
 
   static CountModel get get {
-    final model = ModelStore.get<CountModel>();
+    final model = Store.get<CountModel>();
     if (model != null) {
       return model;
     } else {
@@ -56,7 +56,7 @@ class WatcherTest extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    ModelStore.add(()=>CountModel());
+    Store.add(()=>CountModel());
     return const MaterialApp(
       home: MyHomePage(title: 'Test Page'),
     );

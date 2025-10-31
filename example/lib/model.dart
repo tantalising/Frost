@@ -1,6 +1,6 @@
 import 'package:frost/signal_model.dart';
 
-class CountModel extends SignalModel {
+class CountModel extends Model {
   static final countChanged = Signal();
   var _count = 0;
 

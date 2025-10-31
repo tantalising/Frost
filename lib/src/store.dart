@@ -1,46 +1,46 @@
 import 'package:flutter/material.dart';
-import 'signal_model.dart';
+import 'model.dart';
 
 /// Utility class for storing models of your app.
 ///
-/// Models must be of type [SignalModel].
-/// The init method of [SignalModel] is called automatically when a model
+/// Models must be of type [Model].
+/// The init method of [Model] is called automatically when a model
 /// is added to this store.
-/// Similarly dispose method of [SignalModel] is called when a model is
+/// Similarly dispose method of [Model] is called when a model is
 /// removed from the store.
 /// You cannot add two instances of same model in the store. It will not
 /// update the underlying model even if you add twice.
 /// You can replace an instance of a model with another one using the
-/// [ModelStore.replace] method.
+/// [Store.replace] method.
 ///
 /// Note that it is not necessary to use this class. If you aren't making your
-/// models from [SignalModel] then don't provide a model to [SignalWidget] and
+/// models from inheriting [Model] then
 /// use your favourite way of dependency injection.
 
 // The class ModelStore is lazy and does not really add any model
 // until that particular model is requested. It helps in cases
 // where user wants to initialize models in bulk and use them
 // later or may not even use them. In this way it potentially saves resources.
-typedef ModelBuilder<T extends SignalModel> = T Function();
+typedef ModelBuilder<T extends Model> = T Function();
 
 /// Stores and manages models of the app.
-abstract class ModelStore {
+abstract class Store {
   /// Adds a model to the Store.
   /// No model is added if a model of same type already exists.
   /// Model is added lazily that is no model is created until it is
   /// accessed for the first time.
   /// To add a model when another one of same type already exists, provide
   /// a unique string id using the optional [id] parameter.
-  static void add<T extends SignalModel>(ModelBuilder<T> modelBuilder,
+  static void add<T extends Model>(ModelBuilder<T> modelBuilder,
       [String? id]) {
     final key = id ?? T;
     _LazyModelStore.add(modelBuilder, key);
   }
 
-  /// Adds the model to the store immediately instead of lazily like [ModelStore.add]
+  /// Adds the model to the store immediately instead of lazily like [Store.add]
   /// Provide a unique string id to the optional [id] parameter to add more than one
   /// instance of same model.
-  static void addEager<T extends SignalModel>(T model, [String? id]) {
+  static void addEager<T extends Model>(T model, [String? id]) {
     final key = id ?? T;
     _EagerModelStore.add(model, key);
   }
@@ -49,8 +49,8 @@ abstract class ModelStore {
   /// It also calls the dispose method of the model.
   /// Returns null if no model is found.
   /// Use the [id] parameter to remove an instance of id model.
-  /// See [ModelStore.add] for details.
-  static T? remove<T extends SignalModel>([String? id]) {
+  /// See [Store.add] for details.
+  static T? remove<T extends Model>([String? id]) {
     final key = id ?? T;
     _LazyModelStore.remove(key);
     return _EagerModelStore.remove(key);
@@ -59,8 +59,8 @@ abstract class ModelStore {
   /// Returns the model of given type from the store.
   /// Returns null if no such model exists.
   /// Use the [id] parameter to get an instance of id model.
-  /// See [ModelStore.add] for details.
-  static T? get<T extends SignalModel>([String? id]) {
+  /// See [Store.add] for details.
+  static T? get<T extends Model>([String? id]) {
     final key = id ?? T;
     return _EagerModelStore.get(key) ?? _LazyModelStore.get(key);
   }
@@ -68,12 +68,12 @@ abstract class ModelStore {
   /// Replaces an existing model from the store with the same type of the given
   /// model.
   ///
-  /// Note that [ModelStore.add] doesn't replace a model if it already exists.
+  /// Note that [Store.add] doesn't replace a model if it already exists.
   /// Instead it silently ignores the request. So use this method for replacing
   /// an entire model.
   /// Use the [id] parameter to replace an instance of id model.
-  /// See [ModelStore.add] for details.
-  static void replace<T extends SignalModel>(ModelBuilder<T> builder,
+  /// See [Store.add] for details.
+  static void replace<T extends Model>(ModelBuilder<T> builder,
       [String? id]) {
     final key = id ?? T;
     _LazyModelStore.replace(builder, key);
@@ -91,7 +91,7 @@ abstract class _LazyModelStore {
   static final _modelBuilderRepository =
   _TwoKeyTypeMap<Type, String, ModelBuilder>();
 
-  static void add<T extends SignalModel>(
+  static void add<T extends Model>(
       ModelBuilder<T> modelBuilder, Object key) {
     _modelBuilderRepository[key] = modelBuilder;
   }
@@ -100,17 +100,17 @@ abstract class _LazyModelStore {
     _modelBuilderRepository.remove(key);
   }
 
-  static T? get<T extends SignalModel>(Object key) {
+  static T? get<T extends Model>(Object key) {
     return _buildModelFromBuilder(key);
   }
 
-  static T? _buildModelFromBuilder<T extends SignalModel>(Object key) {
+  static T? _buildModelFromBuilder<T extends Model>(Object key) {
     final model = _modelBuilderRepository[key]?.call() as T?;
     if (model != null) _EagerModelStore.add(model, key);
     return model;
   }
 
-  static void replace<T extends SignalModel>(
+  static void replace<T extends Model>(
       ModelBuilder<T> builder, Object key) {
     _modelBuilderRepository.remove(key);
     _modelBuilderRepository[key] = builder;
@@ -123,26 +123,26 @@ abstract class _LazyModelStore {
 }
 
 abstract class _EagerModelStore {
-  static final _modelRepository = _TwoKeyTypeMap<Type, String, SignalModel>();
+  static final _modelRepository = _TwoKeyTypeMap<Type, String, Model>();
 
-  static void add<T extends SignalModel>(T model, Object key) {
+  static void add<T extends Model>(T model, Object key) {
     if (_modelRepository.containsKey(key)) return;
     model.init();
     _modelRepository[key] = model;
   }
 
-  static T? remove<T extends SignalModel>(Object key) {
+  static T? remove<T extends Model>(Object key) {
     final T? model = _modelRepository.remove(key) as T?;
     model?.dispose();
     return model;
   }
 
-  static T? get<T extends SignalModel>(Object key) {
+  static T? get<T extends Model>(Object key) {
     final T? model = _modelRepository[key] as T?;
     return model;
   }
 
-  static void replace<T extends SignalModel>(T model, Object key) {
+  static void replace<T extends Model>(T model, Object key) {
     remove(key);
     add(model, key);
   }
@@ -195,10 +195,10 @@ class _TwoKeyTypeMap<S extends Object, T extends Object, V extends Object> {
 
 @visibleForTesting
 abstract class TestStub {
-  static Map<Type, SignalModel> get modelRepository =>
+  static Map<Type, Model> get modelRepository =>
       _EagerModelStore._modelRepository.firstTypeMap;
 
-  static Map<String, SignalModel> get idModelRepository =>
+  static Map<String, Model> get idModelRepository =>
       _EagerModelStore._modelRepository.secondTypeMap;
 
   static Map<Type, ModelBuilder> get modelBuilderRepository =>

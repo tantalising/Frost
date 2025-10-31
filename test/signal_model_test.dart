@@ -1,8 +1,8 @@
 import 'package:frost/model_store.dart';
-import 'package:frost/src/model_store.dart';
+import 'package:frost/src/store.dart';
 import 'package:test/test.dart';
 
-class MyModel extends SignalModel {
+class MyModel extends Model {
   bool initCalled = false;
   bool disposeCalled = false;
   bool replaced = false;
@@ -16,10 +16,10 @@ class MyModel extends SignalModel {
     disposeCalled = true;
   }
 }
-class TestModel extends SignalModel {}
+class TestModel extends Model {}
 
 void main() {
-  setUp(() => ModelStore.clear()); // empty the store before every test.
+  setUp(() => Store.clear()); // empty the store before every test.
 
   group('model test group', () {
     test("add model to store", testAddModel);
@@ -47,49 +47,49 @@ void main() {
 
 void testAddModel() {
   final myModel = MyModel();
-  ModelStore.add(() => myModel);
+  Store.add(() => myModel);
   expect(TestStub.modelRepository.containsKey(MyModel), false);
   expect(TestStub.modelBuilderRepository.containsKey(MyModel), true);
-  expect(myModel, ModelStore.get<MyModel>());
+  expect(myModel, Store.get<MyModel>());
   expect(TestStub.modelRepository.containsKey(MyModel), true);
 }
 
 void testAddEagerlyModel() {
-  ModelStore.addEager(MyModel());
+  Store.addEager(MyModel());
   expect(TestStub.modelRepository.containsKey(MyModel), true);
 }
 
 void testGetModel() {
-  ModelStore.add(()=>MyModel());
-  expect(ModelStore.get<MyModel>(), isNot(null));
-  ModelStore.addEager(TestModel());
-  expect(ModelStore.get<TestModel>(), isNot(null));
+  Store.add(()=>MyModel());
+  expect(Store.get<MyModel>(), isNot(null));
+  Store.addEager(TestModel());
+  expect(Store.get<TestModel>(), isNot(null));
 }
 
 void testRemoveModel() {
-  ModelStore.add(()=>MyModel());
-  ModelStore.get<MyModel>(); // needed since addition is lazy.
-  expect(ModelStore.remove<MyModel>(), isNot(null));
+  Store.add(()=>MyModel());
+  Store.get<MyModel>(); // needed since addition is lazy.
+  expect(Store.remove<MyModel>(), isNot(null));
 }
 
 void testReplaceModel() {
-  ModelStore.add(()=>MyModel());
-  ModelStore.replace(()=>MyModel()..replaced=true);
-  expect(ModelStore.get<MyModel>()!.replaced, true);
+  Store.add(()=>MyModel());
+  Store.replace(()=>MyModel()..replaced=true);
+  expect(Store.get<MyModel>()!.replaced, true);
 }
 
 void testInitOnAdd() {
   final myModel = MyModel();
-  ModelStore.add(()=>myModel);
-  ModelStore.get<MyModel>(); // needed since addition is lazy.
+  Store.add(()=>myModel);
+  Store.get<MyModel>(); // needed since addition is lazy.
   expect(myModel.initCalled, true);
 }
 
 void testDisposeOnRemove() {
   final myModel = MyModel();
-  ModelStore.add(()=>myModel);
-  ModelStore.get<MyModel>(); // needed since addition is lazy.
-  ModelStore.remove<MyModel>();
+  Store.add(()=>myModel);
+  Store.get<MyModel>(); // needed since addition is lazy.
+  Store.remove<MyModel>();
   expect(myModel.disposeCalled, true);
 }
 
@@ -97,11 +97,11 @@ void testClear() {
   final modelRepository = TestStub.modelRepository;
   final modelBuilderRepository = TestStub.modelBuilderRepository;
 
-  ModelStore.add(() => TestModel());
-  ModelStore.get<TestModel>();
+  Store.add(() => TestModel());
+  Store.get<TestModel>();
   expect(modelRepository.isNotEmpty, true);
   expect(modelBuilderRepository.isNotEmpty, true);
-  ModelStore.clear();
+  Store.clear();
   expect(modelRepository.isEmpty, true);
   expect(modelRepository.isEmpty, true);
 }
@@ -111,56 +111,56 @@ void testClear() {
 void testAddIdModel() {
   final myModel = MyModel();
   const id = 'modelId';
-  ModelStore.add(() => myModel, 'modelId');
+  Store.add(() => myModel, 'modelId');
   expect(TestStub.idModelRepository.containsKey(id), false);
   expect(TestStub.idModelBuilderRepository.containsKey(id), true);
-  expect(myModel, ModelStore.get(id));
+  expect(myModel, Store.get(id));
   expect(TestStub.idModelRepository.containsKey(id), true);
 }
 
 void testAddEagerlyIdModel() {
   const id = 'modelId';
-  ModelStore.addEager(MyModel(), id);
+  Store.addEager(MyModel(), id);
   expect(TestStub.idModelRepository.containsKey(id), true);
 }
 
 void testGetIdModel() {
   const id = 'modelId';
   const anotherId = 'anotherModelId';
-  ModelStore.add(()=>MyModel(), id);
-  expect(ModelStore.get(id), isNot(null));
-  ModelStore.addEager(TestModel(), anotherId);
-  expect(ModelStore.get(anotherId), isNot(null));
+  Store.add(()=>MyModel(), id);
+  expect(Store.get(id), isNot(null));
+  Store.addEager(TestModel(), anotherId);
+  expect(Store.get(anotherId), isNot(null));
 }
 
 void testRemoveIdModel() {
   const id = 'modelId';
-  ModelStore.add(()=>MyModel(), id);
-  ModelStore.get(id); // needed since addition is lazy.
-  expect(ModelStore.remove(id), isNot(null));
+  Store.add(()=>MyModel(), id);
+  Store.get(id); // needed since addition is lazy.
+  expect(Store.remove(id), isNot(null));
 }
 
 void testReplaceIdModel() {
   const id = 'modelId';
-  ModelStore.add(()=>MyModel(), id);
-  ModelStore.replace(()=>MyModel()..replaced=true, id);
-  expect(ModelStore.get<MyModel>(id)!.replaced, true);
+  Store.add(()=>MyModel(), id);
+  Store.replace(()=>MyModel()..replaced=true, id);
+  expect(Store.get<MyModel>(id)!.replaced, true);
 }
 
 void testInitOnAddIdModel() {
   final myModel = MyModel();
   const id = 'modelId';
-  ModelStore.add(()=>myModel, id);
-  ModelStore.get<MyModel>(id); // needed since addition is lazy.
+  Store.add(()=>myModel, id);
+  Store.get<MyModel>(id); // needed since addition is lazy.
   expect(myModel.initCalled, true);
 }
 
 void testDisposeOnRemoveIdModel() {
   final myModel = MyModel();
   const id = 'modelId';
-  ModelStore.add(()=>myModel, id);
-  ModelStore.get<MyModel>(id); // needed since addition is lazy.
-  ModelStore.remove(id);
+  Store.add(()=>myModel, id);
+  Store.get<MyModel>(id); // needed since addition is lazy.
+  Store.remove(id);
   expect(myModel.disposeCalled, true);
 }
 
@@ -170,11 +170,11 @@ void testClearIdModel() {
 
   const id = 'modelId';
 
-  ModelStore.add(() => TestModel(), id);
-  ModelStore.get<TestModel>(id);
+  Store.add(() => TestModel(), id);
+  Store.get<TestModel>(id);
   expect(modelRepository.isNotEmpty, true);
   expect(modelBuilderRepository.isNotEmpty, true);
-  ModelStore.clear();
+  Store.clear();
   expect(modelRepository.isEmpty, true);
   expect(modelRepository.isEmpty, true);
 }

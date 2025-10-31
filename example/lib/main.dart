@@ -9,7 +9,7 @@ Slot doSomething() {
 }
 
 void main() {
-  ModelStore.add(() => CountModel());
+  Store.add(() => CountModel());
   connect(CountModel.countChanged, doSomething);
   runApp(const MyApp());
 }
@@ -52,7 +52,7 @@ class MyHomePage extends StatelessWidget {
             Watcher(
               signal: CountModel.countChanged,
               watch: (context) => Text(
-                ModelStore.get<CountModel>()!.count.toString(),
+                Store.get<CountModel>()!.count.toString(),
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
             ),
@@ -60,7 +60,7 @@ class MyHomePage extends StatelessWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => ModelStore.get<CountModel>()?.incrementCount(),
+        onPressed: () => Store.get<CountModel>()?.incrementCount(),
         tooltip: 'Increment',
         child: const Icon(Icons.add),
       ),

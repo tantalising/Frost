@@ -3,7 +3,7 @@ import 'package:frost/model_store.dart';
 import 'package:frost/signal.dart';
 import 'package:frost/watcher.dart';
 
-class AutoSignalModel extends SignalModel {
+class AutoSignalModel extends Model {
   int _count = 0;
   final countChanged = Signal();
   int _anotherCount = 0;
@@ -23,7 +23,7 @@ class AutoSignalModel extends SignalModel {
     anotherCountChanged();
   }
 
-  static AutoSignalModel get get => ModelStore.get<AutoSignalModel>()!;
+  static AutoSignalModel get get => Store.get<AutoSignalModel>()!;
 }
 
 class AutoSignalTest extends StatelessWidget {

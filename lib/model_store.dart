@@ -2,5 +2,5 @@
 
 library;
 
-export 'package:frost/src/signal_model.dart';
-export 'package:frost/src/model_store.dart' hide TestStub;
+export 'package:frost/src/model.dart';
+export 'package:frost/src/store.dart' hide TestStub;
