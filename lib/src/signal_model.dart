@@ -1,3 +1,8 @@
+import 'package:flutter/material.dart';
+import 'package:frost/src/watcher_helpers/subscription_manager.dart';
+
+import '../signal.dart';
+
 /// Interface for models intended to be used with signal mechanism.
 ///
 /// It is recommended to implement or inherit from this class for easier usage of signals.
@@ -14,4 +19,11 @@ abstract class SignalModel {
 
   /// Cleans up when the model is removed from the [ModelStore].
   void dispose() {}
+
+  /// Returns the value and also connects the signal to any [Watcher]
+  /// that accessed this value.
+  @protected
+  T getter<T extends Object>(T value, Signal signal) {
+    return SubscriptionManager().connectToSubscribersOf(value, signal);
+  }
 }

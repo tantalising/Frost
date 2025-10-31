@@ -2,7 +2,7 @@ import 'package:frost/model_store.dart';
 import 'package:frost/src/model_store.dart';
 import 'package:test/test.dart';
 
-class MyModel implements SignalModel {
+class MyModel extends SignalModel {
   bool initCalled = false;
   bool disposeCalled = false;
   bool replaced = false;
