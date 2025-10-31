@@ -30,6 +30,11 @@ class Property<T extends Object> {
     return SubscriptionManager().connectToSubscribersOf(_value, changed);
   }
 
+  ///Returns the value of the property.
+  T call() {
+    return value;
+  }
+
   /// Sets the value of the property.
   set value(T newValue) {
     if (newValue == _value) return;
