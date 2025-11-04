@@ -102,11 +102,11 @@ class Watcher extends StatefulWidget {
 class _WatcherState extends State<Watcher> {
   @override
   void initState() {
+    super.initState();
     _connectProperties();
     _connectSignals();
     SubscriptionManager().subscribe(this, _rebuild);
     widget.onInit?.call();
-    super.initState();
   }
 
   @override

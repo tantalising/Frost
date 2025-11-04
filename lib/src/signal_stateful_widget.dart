@@ -20,10 +20,10 @@ abstract class SignalState<T extends SignalStatefulWidget> extends State<T> {
 
   @override
   void initState() {
+    super.initState();
     for (final signal in signals()) {
       signal.connect(_rebuild);
     }
-    super.initState();
   }
 
   @override
