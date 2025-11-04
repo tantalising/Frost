@@ -15,9 +15,9 @@ class SubscriptionManager {
     return _instance;
   }
 
-  void subscribe(Subscriber subscriber, Function rebuild) {
+  void subscribe(Subscriber subscriber, Function notify) {
     if (_subscriptions.containsKey(subscriber)) return;
-    _subscriptions[subscriber] = Subscription(rebuild);
+    _subscriptions[subscriber] = Subscription(notify);
   }
 
   void startTracking(Subscriber subscriber) {
