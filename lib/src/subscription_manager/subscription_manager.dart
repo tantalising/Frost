@@ -1,11 +1,8 @@
-import 'package:flutter/material.dart' show State;
 import '../../signal.dart';
 import 'subscription.dart';
-import '../../watcher.dart';
-
 import 'weak_map.dart';
 
-typedef Subscriber = State<Watcher>;
+typedef Subscriber<T extends Object> = T;
 class SubscriptionManager {
   final _subscriptions = WeakMap<Subscriber, Subscription>();
   final _currentSubscribers = <Subscriber>{};
@@ -61,3 +58,4 @@ T connectToSubscribersOf<T extends Object>(T value, Signal signal) {
     return value;
   }
 }
+
