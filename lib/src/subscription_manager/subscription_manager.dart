@@ -35,14 +35,6 @@ class SubscriptionManager {
     _tracking = false;
   }
 
-  Set<Subscriber> subscribers() {
-    return Set.unmodifiable(_currentSubscribers);
-  }
-
-  Subscription? subscription(Subscriber subscriber) {
-    return _subscriptions[subscriber];
-  }
-
   void unsubscribe(Subscriber subscriber) {
     final subscription = _subscriptions.remove(subscriber);
     subscription?.clear();
@@ -50,10 +42,8 @@ class SubscriptionManager {
 
 T connectToSubscribersOf<T extends Object>(T value, Signal signal) {
     if (!_tracking) return value;
-    final manager = SubscriptionManager();
-    for (final subscriber in manager.subscribers()) {
-      final subscriptions = manager.subscription(subscriber);
-      subscriptions?.add(signal);
+    for (final subscriber in _currentSubscribers) {
+      _subscriptions[subscriber]?.add(signal);
     }
     return value;
   }
