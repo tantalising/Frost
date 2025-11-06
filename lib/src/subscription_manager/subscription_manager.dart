@@ -36,7 +36,7 @@ class SubscriptionManager {
     subscription?.clear();
   }
 
-T connectToSubscribersOf<T extends Object>(T value, Signal signal) {
+T connectToSubscribersOf<T>(T value, Signal signal) {
     final noSubscriberExists = _currentSubscribers.isEmpty;
     if (noSubscriberExists) return value;
     for (final subscriber in _currentSubscribers) {

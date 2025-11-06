@@ -10,7 +10,7 @@ import 'signal.dart';
 /// Property contains a [Property.changed] signal which is emitted
 /// automatically after setting [Property.value] or [Property.update].
 /// It is best to use this in combination with [PropertyWidget].
-class Property<T extends Object> {
+class Property<T> {
   late T _value;
   /// This signal is emitted when the property is changed.
   /// Generally not intended to be used directly.
