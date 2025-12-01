@@ -4,6 +4,9 @@ import 'package:frost/model.dart';
 import 'package:frost/watcher.dart';
 
 bool disposeCalled = false;
+final count = 0.property;
+bool rebuild = false;
+
 class CountModel extends Model {
   bool initCalled = false;
   bool modelInitCalled = false;
@@ -53,11 +56,17 @@ class _MyHomePageState extends State<MyHomePage> {
           Watcher(
             onInit: () => CountModel.get.initCalled = true,
             onDispose: () => disposeCalled = true,
+            when: () => rebuild,
             watch: (context) => Text(
-              'afd'
+              '${count()}',
             ),
           ),
         ],
+      ),
+      floatingActionButton:  MaterialButton(
+        key: const ValueKey('countButton'),
+        onPressed: () => count.value++,
+        child: const Text('press me'),
       ),
     );
   }

@@ -30,7 +30,7 @@ class Property<T> {
     return SubscriptionManager().connectToSubscribersOf(_value, changed);
   }
 
-  ///Returns the value of the property.
+  ///Returns the value of the property. Same as the getter value.
   T call() {
     return value;
   }

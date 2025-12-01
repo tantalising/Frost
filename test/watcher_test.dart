@@ -26,6 +26,10 @@ void main() {
     'OnActivate callback of watcher being called test',
     (tester) => activateCalledTest(tester),
   );
+  testWidgets(
+    "conditional rebuild using the 'when' argument is working test",
+        (tester) => conditionalRebuildWorkingTest(tester),
+  );
 }
 
 Future<void> initCalledTest(WidgetTester tester) async {
@@ -57,6 +61,21 @@ Future<void> deactivateCalledTest(WidgetTester tester) async {
   await tester.tap(reparentButton);
   await tester.pump();
   expect(deactivateCalled, true);
+}
+
+Future<void> conditionalRebuildWorkingTest(WidgetTester tester) async {
+  await tester.pumpWidget(const WatcherTest());
+  final countButton = find.byKey(const ValueKey('countButton'));
+
+  await tester.tap(countButton);
+  await tester.pump();
+  expect(find.text('0'), findsOneWidget);
+
+  rebuild = true;
+  await tester.tap(countButton);
+  await tester.pump();
+  expect(find.text('2'), //2 because rebuild=false didn't update ui previously.
+      findsOneWidget); 
 }
 
 Future<void> _createAndDisposeSignalWidget(tester) async {

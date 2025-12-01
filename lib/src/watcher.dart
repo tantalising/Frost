@@ -71,6 +71,9 @@ class Watcher extends StatefulWidget {
   /// Optional Field for connecting to multiple signals.
   final Set<Signal>? signals;
 
+  /// Optional function that makes the watcher rebuild only when it returns true
+  final bool Function()? when;
+
   /// A callback which is called when this widget is reinserted into the tree after having been
   /// removed via deactivate method of the state object of this widget.
   final VoidCallback? onActivate;
@@ -84,17 +87,19 @@ class Watcher extends StatefulWidget {
   /// A callback which does some work when the widget is disposed.
   final VoidCallback? onDispose;
 
-  const Watcher(
-      {super.key,
-      this.property,
-      this.properties,
-      this.signal,
-      this.signals,
-      required this.watch,
-      this.onActivate,
-      this.onDeactivate,
-      this.onInit,
-      this.onDispose});
+  const Watcher({
+    super.key,
+    this.property,
+    this.properties,
+    this.signal,
+    this.signals,
+    required this.watch,
+    this.when,
+    this.onActivate,
+    this.onDeactivate,
+    this.onInit,
+    this.onDispose,
+  });
   @override
   State<Watcher> createState() => _WatcherState();
 }
@@ -139,7 +144,8 @@ class _WatcherState extends State<Watcher> {
   }
 
   Slot _rebuild() {
-    if (mounted) {
+    final shouldRebuild = widget.when?.call() ?? true;
+    if (mounted && shouldRebuild) {
       setState(() => ());
     }
   }
