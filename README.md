@@ -1,429 +1,419 @@
 # Frost
-Frost provides a mechanism for communication between two entities. It is primarily
-meant to be used as a state management solution. Although Signal is a simple and powerful way for
-managing states, it is not limited to state management only.
+Frost is a lightweight, highly performant, and signal-based state management solution for Flutter. 
+It decouples your business logic from your UI using **Signals**, **Properties**, and a **Store** for
+dependency injection.
+Focus on your logic, not on how to propagate state changes.
 
 ## Installation
-```dart
+
+```bash
 flutter pub add frost
 ```
+## Index
 
-## Contents:
-- [Getting Started](#getting-started)
-    - [Signal Model](#signal-model)
-    - [Signal](#signal)
-    - [Signal Widget](#signal-widget)
-    - [Model Accessor](#model-accessor)
-    - [Property Widget](#property-widget)
-- [Tips](#Tips)
-  - [Eager Model](#eager-model)
-  - [Multiple Model of Same Type](#multiple-model-of-same-type)
-  - [Bulk Addition of Model](#bulk-addition-of-model)
-  - [Model Init and Dispose](#model-init-and-dispose)
-  - [General Slot Usage](#general-slot-usage)
-  - [Widget Init and Dispose](#widget-init-and-dispose)
-- [Detailed Explanation of Signals](#detailed-explanation-of-signals)
-  - [Signal](#signal)
-  - [Slot](#slot)
-  - [Connecting Signals](#connecting-signals)
-  - [Passing Arguments to Signals](#passing-arguments-with-signals)
-  - [Disconnecting Signals](#disconnecting-signals)
+<details>
+<summary><strong>Quick Start</strong></summary>
 
-## Getting started
+- [Quick Start: The Counter App](#quick-start-the-counter-app)
 
-### Signal Model
+</details>
 
-Use [SignalModel] to create the data for your app. We will create a counter app.
+<details>
+<summary><strong>Core Concepts</strong></summary>
+
+- [Properties](#properties)
+- [Watcher](#watcher)
+- [Signals](#signals)
+
+</details>
+
+<details>
+<summary><strong>Architecture: The Store</strong></summary>
+
+- [Define a Model](#define-a-model)
+- [Register the Model](#register-the-model)
+- [Access the Model](#access-the-model)
+- [Pro Tip: Model Accessors](#pro-tip-model-accessors)
+
+</details>
+
+<details>
+<summary><strong>Tips & Tricks</strong></summary>
+
+- [Conditional Rebuilding](#conditional-rebuilding)
+- [Custom Reactive Getters](#custom-reactive-getters)
+- [Widget Init and Dispose](#widget-init-and-dispose)
+- [Handling Lists and Collections](#handling-lists-and-collections)
+- [Multiple Models of Same Type](#multiple-models-of-same-type)
+
+</details>
+
+<details>
+<summary><strong>Detailed Explanation: Signals & Slots</strong></summary>
+
+- [How it works](#how-it-works)
+- [Passing Arguments](#passing-arguments)
+- [Disconnection](#disconnection)
+
+</details>
+
+
+
+## Quick Start: The Counter App
+
+The easiest way to use Frost is with Properties and the Watcher widget.
 
 ```dart
-import 'package:frost/model.dart';
-class CountModel extends SignalModel {
-     void incrementCount() {
-       _counter++;
-     }
-     int get count => _counter;
-     int _counter = 0;
+import 'package:flutter/material.dart';
+import 'package:frost/frost.dart';
+
+// 1. Create a Property (can be global or inside a class)
+final count = 0.property;
+
+void main() {
+  runApp(const MaterialApp(home: CounterApp()));
 }
-```
-### Signal
 
-Use [Signal] for notifying the ui about data changes so that it can update itself.
-Emit the signal when data in model changes.
+class CounterApp extends StatelessWidget {
+  const CounterApp({super.key});
 
-```dart
-class CountModel extends SignalModel {
-     static final countChanged = Signal(); // <-- create a signal
-
-     void incrementCount() {
-       _counter++;
-       countChanged(); // <-- notify about change.
-     }
-     int get count => _counter;
-     int _counter = 0;
-}
-```
-
-> [!Note]:
-> Do not place signals inside stateless widgets.
-> Instead use a private global variable.
-> Signals do not work if placed inside stateless widgets.
-
-### Signal Widget
-
-Use [SignalWidget] for updating your ui when the data changes.
-Fetch your model using [ModelStore.get] method which returns
-a model of the given type or null if none found.
-
-```dart
-    import 'package:frost/signal_widget.dart';
-    SignalWidget(
-      signal: CountModel.countChanged,
-      model: CountModel(), // <-- provide the model so that we can get it using model store
-      builder: (_) => Text(
-      ModelStore.get<CountModel>()!.count.toString(),
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        // 2. Update the value. The UI updates automatically.
+        onPressed: () => count.value++, 
+        child: const Icon(Icons.add),
       ),
-    ),
+      // 3. Use Watcher to listen to changes
+      body: Center(
+        child: Watcher(
+          watch: (context) => Text(
+            'Count: ${count.value}', // Accessing .value automatically registers the listener
+            style: const TextStyle(fontSize: 30),
+          ),
+        ),
+      ),
+    );
+  }
+}
 ```
-Another widget needing the same model doesn't need to provide the model again once it is added to store.
+
+## Core Concepts
+
+### Properties
+
+A Property is a wrapper around a value that notifies listeners when it changes. You can create one 
+from any variable using the .property extension.
 
 ```dart
-  SignalWidget(
-    signal: CountModel.changed,
-    builder: (_) => Text (ModelStore.get<CountModel>()!.count.toString()),
+final name = "Frost".property;
+final isActive = false.property;
+
+// Access the value
+print('name is ${name.value}');
+
+// Or like this
+print('name is ${name()}');
+
+// Update value
+name.value = "Flutter";
+
+// For mutable objects, use update to trigger notification
+user.update((u) {
+  u.age = 25;
+});
+```
+
+### Watcher
+
+The Watcher widget is the bridge between your data and your UI. 
+It intelligently tracks which properties are accessed inside its 
+watch builder and rebuilds only when those specific properties change.
+
+```dart
+Watcher(
+  watch: (context) {
+    // This widget will ONLY rebuild when 'username' changes.
+    // It will NOT rebuild if 'age' changes, because we didn't access it here.
+    return Text(user.value.username);
+  },
 )
 ```
 
-Remove the model from the store when no longer needed using ModelStore.remove method.
+### Signals
+
+Signals are the underlying event mechanism of Frost. Use them when you want to broadcast an event 
+that isn't necessarily a state change (like navigating to a new page or showing a Toast).
 
 ```dart
-ModelStore.remove<CountModel>()
+// Define a signal
+final onLoginSuccess = Signal();
+
+// Emit a signal
+onLoginSuccess();
+
+//You can listen to signals by providing them to widgets using Watcher's signal/signals parameters
+//Or by binding them to some data in your model (Advanced: see 'custom reactive getters' in the tips and tricks section.)
+
+// Rebuild widget when signal emits
+Watcher(
+  signal: onLoginSuccess, 
+  watch: (context) => const Text("Logged in!"),
+)
 ```
-> [!Note]:
-> To connect the widget to more than one signal
-> use the [SignalWidget.signals] argument which takes a set of signals
-> instead of signal.
-
-### Model Accessor
-
-Consider using a model accessor in the model class for shorter access of models.
-```dart
-class CountModel extends SignalModel {
-     static final countChanged = Signal();
-
-    //model Accessor
-     static CountModel get get {
-       final model = ModelStore.get<CountModel>();
-       if(model == null) {
-         throw("CountModel not found");
-       }
-       return model;
-     }
-
-     void incrementCount() {
-       _counter++;
-       countChanged();
-     }
-     int get count => _counter;
-     int _counter = 0;
-}
-```
-
-Now use it as follows:
+You can also connect signals to slots manually in constructor, init or any other suitable place 
+depending on your need. For example, if you need to remove spam mails on request you can connect the
+appropriate signal in your MailService.
 
 ```dart
-      SignalWidget(
-        signal: CountModel.countChanged,
-        model: CountModel(),
-        builder: (_) => Text(
-        CountModel.get.count.toString(), // shorter access
-        ),
-      ),
-```
-
-
-### Property Widget
-
-Since the data is too small we can use [Property] to create our model.
-
-```dart
-import 'package:frost/property.dart';
-final _count = 0.property;
-// final _count = Property(0); or like this as well.
-```
-
-Use [PropertyWidget] for using this property in your app.
-
-```dart
-    PropertyWidget(
-      builder: (_) => Text(
-        _count.value.toString(),
-      ),
-    ),
-```
-Change the property value like this:
-
-```dart
-_count.value = 3;
-```
-In this case the previous value 0 is replaced with 3. If we want to instead modify the
-object stored in the property, then we have to use the [Property.update] method.
-
-```dart
-// we'll modify this object...
- class BigValue {
-  int valueFieldOne = 0;
-  String valueFieldTwo = '';
-  int valueForFieldOne() {
-    return 3;
+class MailService extends Model { //models will be explained shortly.
+  final spamRemovalRequested = Signal();
+  
+  @override
+  init() {
+    connect(spamRemovalRequested, removeSpams);
+    // or like this. Don't do both. They are redundant.
+    spamRemovalRequested.connect(removeSpams);
+  }
+  
+  @override
+  dispose() {
+    disconnect(spamRemovalRequested, removeSpams);
+    // or like this
+    spamRemovalRequested.disconnect(removeSpams);
+  }
+  
+  Slot removeSpams() {
+    // remove spams.
   }
 }
-// create property
-final bigValue = BigValue().property;
-// pretend to do some necessary stuff 
-final intValue = bigValue.value.valueForFieldOne();
-// this will update the ui
-bigValue.update((value) {
-  value.valueFieldOne = intValue;
-});
-// directly modifying won't update the ui 
-bigValue.value.valueFieldOne = bigValue.value.valueForFieldOne();
-//.. though calling an empty update now will update it (not recommended to update like this)
-bigValue.update((_)=>(_));
-
-// don't perform additional operation inside update. Just pass the final value.
-bigValue.update((value) {
-  final intValue = value.valueForFieldOne; // bad. Should be done outside.
-  value.valueFieldOne = intValue;
-})
 ```
-That's all we need for state management! Now read the tips(they are interesting!) and if you want to know more 
-about signals, check the [Detailed Explanation of Signals](#detailed-explanation-of-signals) section.
 
-## Tips
+> [!Note]:
+> Do not place signals and properties inside stateless widgets.
+> Instead use a private global variable or the store.
+> They do not work if placed inside stateless widgets.
 
-### Eager Model
-By default all the models added to the store are not created until first usage. To create a model as
-soon as it is added to the store, use [ModelStore.addEager].
+## Architecture: The Store
+
+For larger apps, you shouldn't keep variables globally. Frost provides a Store to manage your Models
+and Dependencies (Service Locator pattern).
+
+### Define a Model
+
+Extend Model to gain lifecycle hooks (init and dispose) and easier integration with the Store.
 
 ```dart
-  ModelStore.addEager(MyEagerModel());
+class AuthModel extends Model {
+  final user = User().property;
+  final userLoggedIn = Signal();
+
+  void login() {
+    // logic...
+    user.name = loggedInUser;
+    userLoggedIn();
+  }
+}
+
+class MailService extends Model {
+  Slot sendLoginMail() {
+    // send mail here.
+  }
+}
 ```
 
-### Multiple Model of Same Type
-The model store won't add a model if another model of same type already exists. To add(or get etc) model of
-same type, you can use the same methods of ModelStore. Just pass an additional unique string id to the
-methods. Don't forget to pass the id when getting that model or performing any other operation on that model.
+### Register the Model
 
-```dart
-  ModelStore.add(MyEagerModel());
-  ModelStore.add(MyEagerModel(), 'myId');
-```
+Add your models to the Store when your app starts. Models can be added in two ways.
 
-### Bulk Addition of Model
-You can bulk add all the necessary models lazily(or not lazily) before your is app is run. 
-In this way, you will never need to provide a model to the SignalWidget and/or think about whether a 
-model already exists while using a SignalWidget.
+    Lazy: Created only when first accessed.
+    Eager: Created immediately.
 
 ```dart
 void main() {
-  ModelStore.add(() => Model());
-  ModelStore.add(() => AnotherModel());
-  ModelStore.addEager(EagerModel());
-  ModelStore.addEager(AnotherEagerModel());
+  // Lazy (Recommended)
+  Store.add(() => AuthModel());
+  
+  // Eager
+  Store.addEager(MailSerivce());
+
   runApp(const MyApp());
 }
 ```
-If you are sure that the model is indeed in the store, the model accessor can be much shorter.
+
+### Access the Model
+Retrieve the model anywhere in your app.
 
 ```dart
-static MyModel get get => ModelStore.get()!;
+Watcher(
+  watch: (context) => Text('user name is ${Store.get<AuthModel>().user().name}'),
+  // mail will be sent automatically upon login after the signal is connected with the slot.
+  onInit: () => connect(Store.get<AuthModel>().userLoggedIn, Store.get<MailService>().sendLoginMail)
+  onDispose: () => disconnect(Store.get<AuthModel>().userLoggedIn, Store.get<MailService>().sendLoginMail)
+),
 ```
 
-### Model Init and Dispose
-Implement the init and dispose method in your model to do some work when the model is added to
-or removed from the model store. 
+OnInit and onDispose are best used for acquiring and releasing resources relevant to the widget.
+```
+final _controller = TextEditingController();
+Watcher(
+    onInit: () => _controller.addListener(myListener),
+    onDispose: () => _controller.dispose();
+    watch: (context) => TextField(
+       controller: _controller,
+       decoration: const InputDecoration(
+            labelText: 'Type something',
+            ),
+       ),
+),
+```
 
+### Pro Tip: Model Accessors
+
+Add a static getter to your model for cleaner code when you are sure that the returned model can't 
+be null.
 ```dart
-class CountModel extends SignalModel {
- // other stuffs ...
-  @override
-  void init() {
-    // this method will be called when the model is first accessed from the store.
-    super.init();
-  }
-  @override
-  void dispose() {
-    // this method will be called when the model is removed from the store.
-    super.dispose();
-  }
+class AuthModel extends Model {
+  static AuthModel get get => Store.get<AuthModel>()!;
+  // ...
 }
+
+// Usage:
+AuthModel.get.login();
 ```
-### General Slot Usage
-To do something other than ui change when a signal is emitted, connect the signal to a slot that
-does the desired job. You may connect to the methods in the same class as well!
+
+## Tips & Tricks
+### Conditional Rebuilding
+
+Sometimes you want a widget to rebuild only if a certain condition is met, even if the properties 
+it watches have changed. Use the when parameter to control this.
 
 ```dart
-Slot doSomething() {
-  print('doing something');
+Watcher(
+// Only rebuild the UI if the new value is even
+    when: () => count.value % 2 == 0,
+    watch: (context) {
+      return Text("Even Count: ${count.value}");
+    },
+)
+```
+### Custom Reactive Getters
+
+If you are building a custom Model and want to create your own 
+reactive variables (without using the Property wrapper), you can use the getter() method. 
+This connects a private value and a signal to the Watcher's auto-subscription system.
+This is for working more naturally inside model with data but the data should still be 
+exposed like a property. 
+
+```
+class CounterModel extends Model {
+    final _changeSignal = Signal();
+    int _internalCount = 0;
+    
+    // Use getter() to register the dependency automatically
+    int get count => getter(_internalCount, _changeSignal);
+    
+    void increment() {
+        _internalCount++;
+        _changeSignal(); // Watcher will detect this change without needing to provide the signal.
+    }
 }
-connect(CountModel.countChanged, doSomething)
-```
-Disconnect the signal from the slot when no longer needed.
 
-```dart
-disconnect(CountModel.countChanged, doSomething)
+// Use it like this
+Watcher(
+    //signal: _changedSignal, <-- no need to pass this, can't even be passed in this case because of being private.
+    watch: (context) => Text(${CountModel.get.count}),
+),
 ```
 
 ### Widget Init and Dispose
-To do something(for example disposing a controller) when the SignalWidget is created and disposed, provide two callbacks named
-onInit and onDispose. Same is available for PropertyWidget as well.
+
+To do something (for example disposing a controller) when the Watcher is created and disposed, provide the callbacks.
 
 ```dart
-SignalWidget(
+Watcher(
   onInit: () => print('do something here'),
   onDispose: () => print('do something here'),
-  //... other stuffs
-  ),
+  watch: (context) => Container(),
+),
 ```
 
-## Detailed Explanation of Signals
+### Handling Lists and Collections
 
-### Signal
-Let's assume a class Person with an age attribute wants to notify when its age changes. This is how
-the class look:
+When using List, Set, or Map inside a Property, simply modifying the list won't trigger an update 
+because the list reference itself didn't change. Use .update():
+
 ```dart
-class Person {
-  Person(this._age);
-  int _age;
-  int get age => _age;
-  set age(int newAge) => _age = newAge;
+final items = <String>[].property;
+
+// This triggers the UI update
+items.update((list) {
+  list.add("New Item");
+});
+```
+
+### Multiple Models of Same Type
+The model store won't add a model if another model of same type already exists. To add(or get etc) model of
+same type, you can use the same methods of Store. Just pass an additional unique string id to the
+methods. Don't forget to pass the id when getting that model or performing any other operation on that model.
+
+```dart
+  Store.add(MyEagerModel());
+  Store.add(MyEagerModel(), 'myId');
+```
+
+## Detailed Explanation: Signals & Slots
+
+Frost relies on the Signal and Slot pattern. This is a mechanism for communication between two entities.
+
+What are they?
+
+    Signal (The Emitter): Think of this as a radio station. It broadcasts an event. It doesn't care who is listening.
+
+    Slot (The Listener): Think of this as a radio receiver. It connects to the signal to hear what's happening.
+
+## How it works
+
+Unlike other patterns where the Emitter manages a list of listeners (like ChangeNotifier), Signals are independent events.
+
+```dart
+// 1. Create a Signal
+final onDataLoaded = Signal();
+
+// 2. Define a Slot (just a void function)
+void handleData() {
+  print("Data is here!");
 }
 
-```
-We are going to create a _signal_ that will notify other interested entities about the change.
+// 3. Connect
+onDataLoaded.connect(handleData);
 
+// 4. Emit
+onDataLoaded(); // Prints: "Data is here!"
+```
+
+### Passing Arguments
+
+Signals can carry data.
 ```dart
-class Person {
-  static final ageChanged = Signal(); // <-- here. static for ease of use.
-  Person(this._age);
-  int _age;
-  int get age => _age;
-  set age(int newAge) => _age = newAge;
+final onError = Signal();
+
+void showAlert(String message) {
+  print("Error: $message");
 }
 
+onError.connect(showAlert);
+
+// Emit with data
+onError("Network Failed");
 ```
 
-### Signal Emission
-Now we need to _emit_ the signal whenever the age changes.
+### Disconnection
 
+Always disconnect slots when they are no longer needed to prevent memory leaks. The Watcher widget 
+handles this automatically for you when you consume data bound to some signal, but if you use connect
+manually, you must also use disconnect.
 ```dart
-class Person {
-  static final ageChanged = Signal();
-  Person(this._age);
-  int _age;
-  int get age => _age;
-  set age(int newAge) {
-    _age = newAge;
-    ageChanged(); // <-- signal emitted;
-  }
-}
+onError.disconnect(showAlert);
 ```
-
-### Slot
-Let's create a class AgePrinter that prints "Age changed" whenever the age changes.
-We will create a method that will print the required string. Methods or functions which
-are invoked in response to a signal are called _slot_. There's nothing special about them.
-They are just regular functions which serve a specific purpose(Here responding to a signal).
-Here's how the class looks:
-
-```dart
-class AgePrinter {
-  Slot printUpdateMessage() {
-    print("Age Updated");
-  }
-}
-```
-> Note:
-> _Slot_ is just a typedef for void. 
-> It is used to highlight that the method is intended to be used as a slot.
-
-### Connecting Signals
-
-We need to _connect_ the signal to our slot to make this work.
-
-```dart
-  void main() {
-    final person = Person(30);
-    final printer = AgePrinter();
-
-    Person.ageChanged.connect(printer.printUpdateMessage);
-    //connect(Person.ageChanged, printer.printUpdateMessage); <- or like this as well
-    person.age = 12;
-  }
-```
-This will print "Age Updated" when run. 
-This is good but doesn't print the age of the person. In order to do so, we need to pass the
-age with the signal.
-
-### Passing Arguments with Signals
-
-```dart
-class Person {
-  static final ageChanged = Signal();
-  Person(this._age);
-  int _age;
-  int get age => _age;
-  set age(int newAge) {
-    _age = newAge;
-    ageChanged(newAge); // <-- passing the age here;
-  }
-}
-```
-To print the age passed by signal, we need to update the slot syntax as well. We are going to take
-the age as a parameter in the slot.
-
-```dart
-class AgePrinter {
-  Slot printUpdateMessage(int age) {
-    print("Age Updated. New age is $age");
-  }
-}
-```
-
-Running the code now would print "Age updated. New age is 12". 
-
-### Disconnecting Signals
-
-It is necessary to _disconnect_ the slot when no longer needed in order to avoid undesired
-calls to slots or calls to non-existent slots.
-
-We can disconnect using a similar syntax. Just replace the connect with disconnect.
-Let's assume we don't want to print the message if the last printed age is 100. 
-
-```dart
-class AgePrinter {
-  Slot printUpdateMessage(int age) {
-    print("Age Updated. New age is $age");
-    if(age == 100) {
-      Person.ageChanged.disconnect(printUpdateMessage); //<-- disconnect here
-      //disconnect(Person.ageChanged, printUpdateMessage); <-- or like this
-    }
-  }
-}
-
-  void main() {
-    final person = Person(30);
-    final printer = AgePrinter();
-
-    Person.ageChanged.connect(printer.printUpdateMessage);
-    person.age = 19;
-    person.age = 99;
-    person.age = 100;
-    person.age = 12; // <-- no response for this code
-  }
-```
-As you can see, running the code won't print the new age after the age has become 100 once.
-
-
-
-

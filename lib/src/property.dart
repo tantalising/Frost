@@ -9,7 +9,19 @@ import 'signal.dart';
 /// In that case creating a property will be shorter.
 /// Property contains a [Property.changed] signal which is emitted
 /// automatically after setting [Property.value] or [Property.update].
-/// It is best to use this in combination with [PropertyWidget].
+/// It is best to use this in combination with [Watcher].
+/// ### Mutable Objects
+/// For primitive types (int, String, bool), simply setting `.value` works.
+/// For mutable objects (List, custom classes), use [update] to modify the object
+/// and trigger a notification.
+///
+/// ```dart
+/// // Primitive
+/// count.value = 5;
+///
+/// // Mutable
+/// listProperty.update((list) => list.add(item));
+/// ```
 class Property<T> {
   late T _value;
   /// This signal is emitted when the property is changed.

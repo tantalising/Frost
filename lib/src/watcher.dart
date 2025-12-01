@@ -3,58 +3,33 @@ import 'package:frost/src/subscription_manager/subscription_manager.dart';
 import 'signal.dart';
 import 'property.dart';
 
-/// An Widget that accepts a watch that uses property and automatically rebuilds
-/// when the property is changed.
+/// A Widget that automatically tracks [Property] access and rebuilds when they change.
 ///
-/// Let us assume you need a property for a count. You can create the
-/// property in the following way:
+/// The [Watcher] is the primary way to consume state in Frost. It uses a smart
+/// tracking system that detects which properties are accessed within the [watch]
+/// builder and subscribes to them.
+///
+/// ### Basic Usage
 /// ```dart
-/// final _count = 0.property; //private globals are fine.
-/// final _count = Property<int>(0); // this works as well but ugly.
-/// ```
-/// Now to create a widget that shows this count and also updates
-/// when the count changes, you can use the Watcher:
-/// ```dart
-///      Watcher(
-///          watch: (context) => Text(
-///          _count.value,
-///          ),
-///         ),
-/// ```
-/// Let us assume you have a class like this:
-/// ```dart
-///   class Count {
-///     Count(this.count);
-///     int count;
-///   }
+/// final count = 0.property;
+///
+/// Watcher(
+///   watch: (context) => Text("Count: ${count.value}"),
+/// )
 /// ```
 ///
-///Create a property out of this class like this:
-///```dart
-/// final _count = Count(0).property;
-///```
-///You can update the property like this:
-///```dart
-/// _count.value = Count(1);
-///```
-///Though this works we don't want to create a new object here.
-///This would have been fine if count was made of an int like this:
-///```dart
-/// final _count = 0.property;
-/// //update like this;
-/// _count.value = 2;
-///```
-///To change the interior of the value that is stored in the property
-///use the [Property.update] method.
-///```dart
-/// _count.update((value) { value.count = 2 });
-///```
-/// If you just update the value directly, the Watcher
-/// won't update the ui unless you emit the [Property.changed] signal as well.
+/// ### Lifecycle & Manual Signals
+/// [Watcher] can replace [StatefulWidget] for simple lifecycle needs or explicit signal listening.
 ///
-/// If you want to connect  to some signals or properties manually then you
-/// can use [Watcher.signal] or [Watcher.signals] and [Watcher.property] or
-/// [Watcher.properties] arguments.
+/// ```dart
+/// Watcher(
+///   onInit: acquireSomeController,
+///   onDispose: releaseController,
+///   signal: myCustomSignal, // Rebuilds when this signal emits
+///   signals: {signal1, signal2} // More than one signal can be connected if needed.
+///   watch: (context) => const Text("Signal(s) emitted! Using some controller as well."),
+/// )
+/// ```
 class Watcher extends StatefulWidget {
   /// The builder for the widget that uses property inside itself.
   final Widget Function(BuildContext context) watch;

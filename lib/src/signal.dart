@@ -46,12 +46,6 @@ import 'slot_store.dart';
 ///   signalEmitter.somethingHappened.disconnect(signalReceiver.handleSomethingHappened);
 ///   //disconnect(signalEmitter.somethingHappened, signalReceiver.handleSomethingHappened); <- or like this
 ///```
-
-/// Helps visually distinguishing between slots and other methods.
-/// Not necessary to use but helpful for void slots.
-/// Slots must be a function with at most one argument.
-typedef Slot = void;
-
 /// The Signal class offering all the signal features.
 class Signal {
   final _slotStore = SlotStore();
@@ -108,6 +102,10 @@ void disconnect(Signal signal, Function slot) {
   signal._slotStore.remove(slot);
 }
 
+/// Helps visually distinguishing between slots and other methods.
+/// Not necessary to use but helpful for void slots.
+/// Slots must be a function with at most one argument.
+typedef Slot = void;
 /*----------------------- private -------------------------------*/
 
 String _showError<T>(Function slot, [T? argument]) {
