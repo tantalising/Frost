@@ -11,9 +11,9 @@ final yetAnotherCount = 10.property;
 //here we testing if externally supplied properties are triggering rebuild.
 //so we need to read their values in an indirect way.
 
-var count_mirror = 0;
-var anotherCount_mirror = 5;
-var yetAnotherCount_mirror = 10;
+var countMirror = 0;
+var anotherCountMirror = 5;
+var yetAnotherCountMirror = 10;
 
 
 var initCalled = false;
@@ -47,20 +47,20 @@ class MyHomePage extends StatelessWidget {
               onDispose: () => disposeCalled = true,
               property: count,
               watch: (context) => Text(
-                "$count_mirror",
+                "$countMirror",
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
             ),
             Watcher(
               onInit: () {
                 //we have to connect the mirror variables somewhere. this seems to be a nice place.
-                connect(count.changed, () => count_mirror = count.value);
-                connect(anotherCount.changed, () => anotherCount_mirror = anotherCount.value);
-                connect(yetAnotherCount.changed, () => yetAnotherCount_mirror = yetAnotherCount.value);
+                connect(count.changed, () => countMirror = count.value);
+                connect(anotherCount.changed, () => anotherCountMirror = anotherCount.value);
+                connect(yetAnotherCount.changed, () => yetAnotherCountMirror = yetAnotherCount.value);
               },
               properties: {anotherCount, yetAnotherCount},
-              watch: (_) => Text("The another count is $anotherCount_mirror"
-                  " and the yet another count is $yetAnotherCount_mirror"),
+              watch: (_) => Text("The another count is $anotherCountMirror"
+                  " and the yet another count is $yetAnotherCountMirror"),
             ),
             MaterialButton(
               key: const ValueKey('anotherCountButton'),

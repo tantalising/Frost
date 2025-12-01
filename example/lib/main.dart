@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:frost/signal.dart';
 import 'package:frost/watcher.dart';
@@ -5,7 +6,9 @@ import 'package:frost/store.dart';
 import 'model.dart';
 
 Slot doSomething() {
-  print('doing something');
+  if (kDebugMode) {
+    print('doing something');
+  }
 }
 
 void main() {
