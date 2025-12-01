@@ -6,13 +6,8 @@ import 'pages_for_testing_widgets/watcher_test_page.dart';
 
 void main() {
   setUp(() => Store.clear()); // empty the store before every test.
-  testWidgets("signal widget test", (tester) => singleSignalTest(tester));
   testWidgets(
-    "multiple signals widget test",
-    (tester) => multiSignalTest(tester),
-  );
-  testWidgets(
-    "init passed to signal widget being called test",
+    "init passed to watcher being called test",
     (tester) => initCalledTest(tester),
   );
   testWidgets(
@@ -20,39 +15,17 @@ void main() {
     (tester) => modelInitCalledTest(tester),
   );
   testWidgets(
-    "dispose passed to signal widget being called test",
+    "dispose passed to watcher being called test",
     (tester) => disposeCalledTest(tester),
   );
   testWidgets(
-    'OnDeactivate callback of SignalWidget being called test',
+    'OnDeactivate callback of watcher being called test',
     (tester) => deactivateCalledTest(tester),
   );
   testWidgets(
-    'OnActivate callback of SignalWidget being called test',
+    'OnActivate callback of watcher being called test',
     (tester) => activateCalledTest(tester),
   );
-}
-
-Future<void> singleSignalTest(tester) async {
-  final incrementButton = find.byKey(const ValueKey("incrementButton"));
-
-  await tester.pumpWidget(const WatcherTest());
-  await tester.tap(incrementButton);
-  await tester.pump();
-
-  expect(find.text('1'), findsOneWidget);
-}
-
-Future<void> multiSignalTest(tester) async {
-  final incrementButton =
-      find.byKey(const ValueKey("multiSignalIncrementButton"));
-
-  await tester.pumpWidget(const WatcherTest());
-  await tester.tap(incrementButton);
-  await tester.pump();
-
-  expect(find.text('6'), findsOneWidget);
-  expect(find.text('11'), findsOneWidget);
 }
 
 Future<void> initCalledTest(WidgetTester tester) async {
