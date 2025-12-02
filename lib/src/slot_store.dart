@@ -6,25 +6,19 @@ class SlotStore {
     _slotsToBeAdded.add(slot);
   }
 
-  void addMultiSlot(List<Function> multiSlot) {
-    _multiSlotsToBeAdded.add(multiSlot);
-  }
-
   void remove(Function slot) {
     _slotsToBeRemoved.add(slot);
   }
 
   ({bool signatureMismatchedForSomeSlots, Function? slot}) callSlots() {
     final ret = _callSlots(_slots);
-    final multiRet = _callMultiSlots();
-    return ret.signatureMismatchedForSomeSlots ? ret : multiRet;
+    return ret;
   }
 
   ({bool signatureMismatchedForSomeSlots, Function? slot})
       callSlotsWithArgument<T>(T argument) {
     final ret = _callSlotsWithArgument(argument, _slots);
-    final multiRet = _callMultiSlotsWithArgument(argument);
-    return ret.signatureMismatchedForSomeSlots ? ret : multiRet;
+    return ret;
   }
 
   void sync() {
@@ -37,25 +31,15 @@ class SlotStore {
 
   void _addSlotsPendingToBeAdded() {
     _slots.addAll(_slotsToBeAdded);
-    _multiSlots.addAll(_multiSlotsToBeAdded);
   }
 
   void _removeSlotsPendingToBeRemoved() {
     _slots.removeAll(_slotsToBeRemoved);
-    // If a slot is in one of multi slots, then...
-    for(final multiSlot in _multiSlots) {
-      for (final slot in _slotsToBeRemoved) {
-        if (multiSlot.contains(slot)) {
-          multiSlot.remove(slot);
-        }
-      }
-    }
   }
 
   void _clearSetsOfPendingSlots() {
     _slotsToBeAdded.clear();
     _slotsToBeRemoved.clear();
-    _multiSlotsToBeAdded.clear();
   }
 
   ({bool signatureMismatchedForSomeSlots, Function? slot}) _callSlots(
@@ -86,41 +70,16 @@ class SlotStore {
     return _noMismatch;
   }
 
-  ({bool signatureMismatchedForSomeSlots, Function? slot}) _callMultiSlots() {
-    for (final multiSlot in _multiSlots) {
-      final ret = _callSlots(multiSlot);
-      if (ret.signatureMismatchedForSomeSlots) {
-        return ret;
-      }
-    }
-    return _noMismatch;
-  }
-
-  ({bool signatureMismatchedForSomeSlots, Function? slot})
-      _callMultiSlotsWithArgument<T>(T argument) {
-    for (final multiSlot in _multiSlots) {
-      final ret = _callSlotsWithArgument(argument, multiSlot);
-      if (ret.signatureMismatchedForSomeSlots) {
-        return ret;
-      }
-    }
-    return _noMismatch;
-  }
-
   ({bool signatureMismatchedForSomeSlots, Function? slot}) _misMatched(
       Function slot) =>
       (signatureMismatchedForSomeSlots: true, slot: slot);
 
   // --------------------------------------------------------------- //
 
-  final HashSet<Function> _slots = HashSet();
+  final LinkedHashSet<Function> _slots = LinkedHashSet();
 
   final _slotsToBeAdded = HashSet<Function>();
   final _slotsToBeRemoved = HashSet<Function>();
-
-  final _multiSlotsToBeAdded = HashSet<List<Function>>();
-
-  final List<List<Function>> _multiSlots = [];
 
   static const _noMismatch =
   (signatureMismatchedForSomeSlots: false, slot: null);

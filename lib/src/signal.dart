@@ -55,11 +55,6 @@ class Signal {
     _connect(this, slot);
   }
 
-  /// in built multi connect for object flavoured usage.
-  void multiConnect(List<Function> slots) {
-    _multiConnect(this, slots);
-  }
-
   /// in built disconnect function for object flavoured usage.
   void disconnect(Function slot) {
     _disconnect(this, slot);
@@ -81,17 +76,6 @@ const _connect = connect;
 /// to a slot.
 void connect(Signal signal, Function slot) {
   signal._slotStore.add(slot);
-}
-
-const _multiConnect = multiConnect;
-
-/// free floating multi connect function. Use it to connect a list of slots
-/// to a signal.
-/// The speciality of this function is that the slots are guaranteed to be called
-/// in order. That is, if the list looks like {a,b,c}, slot 'a' will be called first,
-/// then 'b' and so on.
-void multiConnect(Signal signal, List<Function> slots) {
-  signal._slotStore.addMultiSlot(slots);
 }
 
 const _disconnect = disconnect;
