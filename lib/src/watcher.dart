@@ -80,12 +80,12 @@ class Watcher extends StatefulWidget {
 }
 
 class _WatcherState extends State<Watcher> {
+  bool subscribed = false;
   @override
   void initState() {
     super.initState();
     _connectProperties();
     _connectSignals();
-    SubscriptionManager().subscribe(this, _rebuild);
     widget.onInit?.call();
   }
 
@@ -93,7 +93,6 @@ class _WatcherState extends State<Watcher> {
   void dispose() {
     _disconnectProperties();
     _disconnectSignals();
-    SubscriptionManager().unsubscribe(this);
     widget.onDispose?.call();
     super.dispose();
   }
@@ -112,10 +111,16 @@ class _WatcherState extends State<Watcher> {
 
   @override
   Widget build(BuildContext context) {
-    SubscriptionManager().startTracking(this);
-    final widgetTree = widget.watch(context);
-    SubscriptionManager().stopTracking(this);
-    return widgetTree;
+    if (subscribed) {
+      return widget.watch(context);
+    }
+
+    SubscriptionManager.initiateSubscription(_rebuild);
+    final watchedWidget = widget.watch(context);
+    SubscriptionManager.finalizeSubscription();
+
+    subscribed = true;
+    return watchedWidget;
   }
 
   Slot _rebuild() {

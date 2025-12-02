@@ -1,48 +1,21 @@
+import 'dart:ui';
 import '../../signal.dart';
-import 'subscription.dart';
-import 'weak_map.dart';
 
-typedef Subscriber<T extends Object> = T;
-class SubscriptionManager {
-  final _subscriptions = WeakMap<Subscriber, Subscription>();
-  final _currentSubscribers = <Subscriber>{};
-  final _alreadyTrackedSubscribers = <Subscriber>{};
 
-  SubscriptionManager._internal();
-  static final SubscriptionManager _instance =
-  SubscriptionManager._internal();
-  factory SubscriptionManager() {
-    return _instance;
+abstract class SubscriptionManager {
+  static VoidCallback? _activeSubscription;
+
+  static void initiateSubscription(VoidCallback subscription) {
+    _activeSubscription = subscription;
   }
 
-  void subscribe(Subscriber subscriber, Function notify) {
-    if (_subscriptions.containsKey(subscriber)) return;
-    _subscriptions[subscriber] = Subscription(notify);
+  static void finalizeSubscription() {
+    _activeSubscription = null;
   }
 
-  void startTracking(Subscriber subscriber) {
-    if (_alreadyTrackedSubscribers.contains(subscriber)) return;
-    _currentSubscribers.add(subscriber);
-    _alreadyTrackedSubscribers.add(subscriber);
-  }
-
-  void stopTracking(Subscriber subscriber) {
-    if (!_alreadyTrackedSubscribers.contains(subscriber)) return;
-    _currentSubscribers.remove(subscriber);
-  }
-
-  void unsubscribe(Subscriber subscriber) {
-    final subscription = _subscriptions.remove(subscriber);
-    subscription?.clear();
-  }
-
-T connectToSubscribersOf<T>(T value, Signal signal) {
-    final noSubscriberExists = _currentSubscribers.isEmpty;
-    if (noSubscriberExists) return value;
-    for (final subscriber in _currentSubscribers) {
-      _subscriptions[subscriber]?.add(signal);
-    }
+  static T connectToSubscribersOf<T>(T value, Signal signal) {
+    if (_activeSubscription == null) return value;
+    signal.connect(_activeSubscription!);
     return value;
   }
 }
-

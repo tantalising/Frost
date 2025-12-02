@@ -1,6 +1,4 @@
-import 'package:frost/watcher.dart';
 import 'package:frost/src/subscription_manager/subscription_manager.dart';
-
 import 'signal.dart';
 
 /// Class implementing property functionality.
@@ -39,7 +37,7 @@ class Property<T> {
 
   ///Returns the value of the property.
   T get value {
-    return SubscriptionManager().connectToSubscribersOf(_value, changed);
+    return SubscriptionManager.connectToSubscribersOf(_value, changed);
   }
 
   ///Returns the value of the property. Same as the getter value.

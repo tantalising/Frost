@@ -11,7 +11,7 @@ class SlotStore {
   }
 
   ({bool signatureMismatchedForSomeSlots, Function? slot}) callSlots() {
-    for (final slot in _slots) {
+    for (final slot in List.of(_slots, growable: false)) {
       try {
         slot();
       } on Error {

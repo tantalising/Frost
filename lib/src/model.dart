@@ -22,6 +22,6 @@ abstract class Model {
   /// that accessed this value.
   @protected
   T getter<T extends Object>(T value, Signal signal) {
-    return SubscriptionManager().connectToSubscribersOf(value, signal);
+    return SubscriptionManager.connectToSubscribersOf(value, signal);
   }
 }
