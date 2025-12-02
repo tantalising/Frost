@@ -15,14 +15,14 @@ class SlotStore {
   }
 
   ({bool signatureMismatchedForSomeSlots, Function? slot}) callSlots() {
-    final ret = _callSlots(_slots.toList());
+    final ret = _callSlots(_slots);
     final multiRet = _callMultiSlots();
     return ret.signatureMismatchedForSomeSlots ? ret : multiRet;
   }
 
   ({bool signatureMismatchedForSomeSlots, Function? slot})
       callSlotsWithArgument<T>(T argument) {
-    final ret = _callSlotsWithArgument(argument, _slots.toList());
+    final ret = _callSlotsWithArgument(argument, _slots);
     final multiRet = _callMultiSlotsWithArgument(argument);
     return ret.signatureMismatchedForSomeSlots ? ret : multiRet;
   }
@@ -59,7 +59,7 @@ class SlotStore {
   }
 
   ({bool signatureMismatchedForSomeSlots, Function? slot}) _callSlots(
-      List<Function> slots) {
+      Iterable<Function> slots) {
     for (final slot in slots) {
       try {
         slot();
@@ -71,7 +71,7 @@ class SlotStore {
   }
 
   ({bool signatureMismatchedForSomeSlots, Function? slot})
-      _callSlotsWithArgument<T>(T argument, List<Function> slots) {
+      _callSlotsWithArgument<T>(T argument, Iterable<Function> slots) {
     for (final slot in slots) {
       try {
         slot(argument);
