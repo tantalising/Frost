@@ -65,7 +65,6 @@ class Signal {
   /// If an argument is provided but the slot doesn't take one,
   /// then the argument is discarded and the slot is still called.
   void call<T>([T? argument]) {
-    _slotStore.sync(); // See the SlotStore class docs for explanation
     _emit<T>(this, argument);
   }
 }
