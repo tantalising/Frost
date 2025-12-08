@@ -65,7 +65,7 @@ class Signal {
   /// If an argument is provided but the slot doesn't take one,
   /// then the argument is discarded and the slot is still called.
   void call<T>([T? argument]) {
-    _emit<T>(this, argument);
+    _slotStore.callSlots(argument);
   }
 }
 
@@ -89,71 +89,3 @@ void disconnect(Signal signal, Function slot) {
 /// Not necessary to use but helpful for void slots.
 /// Slots must be a function with at most one argument.
 typedef Slot = void;
-/*----------------------- private -------------------------------*/
-
-String _showError<T>(Function slot, [T? argument]) {
-  final calledWithArgument = argument != null;
-  final argumentMessage = calledWithArgument
-      ? 'with argument \'$argument\' of type \'${argument.runtimeType}\''
-      : 'with no argument';
-
-  String probablyArgumentMissingOrMismatched() {
-    if (!calledWithArgument) {
-      return '\n\tMost probable cause: An argument is expected by the slot but it was not provided with the signal.\n';
-    }
-    return '\n\tMost probable cause: Type of the argument provided with signal does not match with the type expected by the slot.\n';
-  }
-
-  String probablyMoreThanOneArgumentExpectedBySlot() {
-    final moreThanOneArgExpected = slot.toString().contains(',');
-    return moreThanOneArgExpected
-        ? '\n\tMost probable cause: Slot takes more than one argument which is not supported.\n'
-        : '';
-  }
-
-  String helpfulMessage() {
-    final message = probablyMoreThanOneArgumentExpectedBySlot();
-    return message == '' ? probablyArgumentMissingOrMismatched() : message;
-  }
-
-  String slotMessages(bool calledWithArgument) {
-    return calledWithArgument
-        ? 'Slot takes more than one argument.'
-        : 'Slot expects argument but was not provided.';
-  }
-
-  final slotMessage = slotMessages(calledWithArgument);
-  final message = '\n\nfrost: Signal was emitted $argumentMessage.\n'
-      'Slot \'$slot\' which was connected to this signal could not be called.\n'
-      'One of the following cases may have occurred: \n\n'
-      '\t1. Expected argument type does not match with the provided one.\n'
-      '\t2. $slotMessage\n'
-      '\t ${helpfulMessage()}'
-      '\nNote that Slot must be a function '
-      'with zero or one argument.\n'
-      'fix the issue to continue without assertion failure.'
-      '\n';
-  return message;
-}
-
-void _emit<T>(Signal signal, [T? argument]) {
-  if (argument == null) {
-    _callSlots(signal);
-  } else {
-    _callSlotsWithArgument<T>(signal, argument);
-  }
-}
-
-void _callSlots(Signal signal) {
-  final (signatureMismatchedForSomeSlots: mismatched, slot: mismatchedSlot) =
-      signal._slotStore.callSlots();
-
-  assert(!mismatched, _showError(mismatchedSlot!));
-}
-
-void _callSlotsWithArgument<T>(Signal signal, T argument) {
-  final (signatureMismatchedForSomeSlots: mismatched, slot: mismatchedSlot) =
-      signal._slotStore.callSlotsWithArgument(argument);
-
-  assert(!mismatched, _showError(mismatchedSlot!, argument));
-}

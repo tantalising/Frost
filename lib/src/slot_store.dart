@@ -1,4 +1,4 @@
-typedef ReturnType = ({bool signatureMismatchedForSomeSlots, Function? slot});
+import 'package:flutter/foundation.dart';
 
 /// This class manages calling and storing slots.
 class SlotStore {
@@ -20,69 +20,109 @@ class SlotStore {
     _slots.remove(slot);
   }
 
-  ReturnType callSlots() {
-    ReturnType returnValue = _noMismatch;
+  void callSlots<T>(T? argument) {
+    final hasArgument = argument != null;
     final length = _slots.length;
+
     iterating = true;
+    try {
+      for (index = 0; index < length; index++) {
+        final slot = _slots.elementAtOrNull(index);
+        if (slot == null) break;
 
-    for (index = 0; index < length; index++) {
-      final slot = _slots.elementAtOrNull(index);
-      if (slot == null) break;
-      try {
-        slot();
-       _adjustIndex();
-      } on Error {
-        returnValue = _misMatched(slot);
-        break;
-      }
-    }
-
-    index = 0;
-    iterating = false;
-    return returnValue;
-  }
-
-  ReturnType callSlotsWithArgument<T>(T argument) {
-    ReturnType returnValue = _noMismatch;
-    var length = _slots.length;
-    iterating = true;
-    for (index = 0; index < length; index++) {
-      final slot = _slots.elementAtOrNull(index);
-      if (slot == null) break;
-      try {
-        slot(argument);
-        _adjustIndex();
-      } on Error {
-        try {
-          slot(); // In case the user chose to ignore the argument. Signal passes an argument but this particular slot doesn't need it.
-          _adjustIndex();
-        } on NoSuchMethodError {
-          returnValue = (signatureMismatchedForSomeSlots: false, slot: slot);
-          break;
+        if (hasArgument) {
+          _callSlotWithArgument(slot, argument);
+        } else {
+          _callSlot(slot);
         }
       }
+    } finally {
+      iterating = false;
     }
-    index = 0;
-    iterating = false;
-    return returnValue;
   }
 
-   void _adjustIndex() {
-     index -= indexCorrection;
-     indexCorrection = 0;
+  void _callSlot<T>(Function slot) {
+    try {
+      slot();
+      _adjustIndex();
+    } on Error {
+      if (kDebugMode) {
+        final errorMessage = _errorMessage(slot, _slotCalledWithArgument);
+        _slotCalledWithArgument = false;
+        throw Exception(errorMessage);
+      }
+      return;
+    }
   }
 
-  ReturnType _misMatched(Function slot) =>
-      (signatureMismatchedForSomeSlots: true, slot: slot);
+  void _callSlotWithArgument<T>(Function slot, T argument) {
+    try {
+      slot(argument);
+      _adjustIndex();
+    } on Error {
+      // the whole point of this is not passing this as an argument. Because you will
+      // have to pass that in non-debug modes as well when that data isn't even needed.
+      _slotCalledWithArgument = true;
+      _callSlot(slot);
+    }
+  }
+
+  void _adjustIndex() {
+    index -= indexCorrection;
+    indexCorrection = 0;
+  }
 
   // --------------------------------------------------------------- //
 
   final _slots = <Function>[];
+  bool _slotCalledWithArgument = false;
 
   var indexCorrection = 0;
   var index = 0;
   bool iterating = false;
+}
 
-  static const _noMismatch =
-      (signatureMismatchedForSomeSlots: false, slot: null);
+String _errorMessage<T>(Function slot, [T? argument]) {
+  final calledWithArgument = argument != null;
+  final argumentMessage = calledWithArgument
+      ? 'with argument \'$argument\' of type \'${argument.runtimeType}\''
+      : 'with no argument';
+
+  String probablyArgumentMissingOrMismatched() {
+    if (!calledWithArgument) {
+      return '\n\tMost probable cause: An argument is expected by the slot but it was not provided with the signal.\n';
+    }
+    return '\n\tMost probable cause: Type of the argument provided with signal does not match with the type expected by the slot.\n';
+  }
+
+  String probablyMoreThanOneArgumentExpectedBySlot() {
+    final moreThanOneArgExpected = slot.toString().contains(',');
+    return moreThanOneArgExpected
+        ? '\n\tMost probable cause: Slot takes more than one argument which is not supported.\n'
+        : '';
+  }
+
+  String helpfulMessage() {
+    final message = probablyMoreThanOneArgumentExpectedBySlot();
+    return message == '' ? probablyArgumentMissingOrMismatched() : message;
+  }
+
+  String slotMessages(bool calledWithArgument) {
+    return calledWithArgument
+        ? 'Slot takes more than one argument.'
+        : 'Slot expects argument but was not provided.';
+  }
+
+  final slotMessage = slotMessages(calledWithArgument);
+  final message = '\n\nfrost: Signal was emitted $argumentMessage.\n'
+      'Slot \'$slot\' which was connected to this signal could not be called.\n'
+      'One of the following cases may have occurred: \n\n'
+      '\t1. Expected argument type does not match with the provided one.\n'
+      '\t2. $slotMessage\n'
+      '\t ${helpfulMessage()}'
+      '\nNote that Slot must be a function '
+      'with zero or one argument.\n'
+      'fix the issue to continue without assertion failure.'
+      '\n';
+  return message;
 }
