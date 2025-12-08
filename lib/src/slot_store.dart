@@ -1,50 +1,88 @@
-import 'dart:collection';
+typedef ReturnType = ({bool signatureMismatchedForSomeSlots, Function? slot});
 
 /// This class manages calling and storing slots.
 class SlotStore {
   void add(Function slot) {
+    if (_slots.contains(slot)) return;
     _slots.add(slot);
   }
 
   void remove(Function slot) {
+    if (iterating) {
+      var slotIndex = _slots.indexOf(slot);
+
+      final slotRemoved = slotIndex >= 0;
+      final wasSituatedBeforeCurrentIndex = slotIndex <= index;
+      if (slotRemoved && wasSituatedBeforeCurrentIndex) {
+        indexCorrection += 1;
+      }
+    }
     _slots.remove(slot);
   }
 
-  ({bool signatureMismatchedForSomeSlots, Function? slot}) callSlots() {
-    for (final slot in List.of(_slots, growable: false)) {
+  ReturnType callSlots() {
+    ReturnType returnValue = _noMismatch;
+    final length = _slots.length;
+    iterating = true;
+
+    for (index = 0; index < length; index++) {
+      final slot = _slots.elementAtOrNull(index);
+      if (slot == null) break;
       try {
         slot();
+       _adjustIndex();
       } on Error {
-        return _misMatched(slot);
+        returnValue = _misMatched(slot);
+        break;
       }
     }
-    return _noMismatch;
+
+    index = 0;
+    iterating = false;
+    return returnValue;
   }
 
-  ({bool signatureMismatchedForSomeSlots, Function? slot})
-      callSlotsWithArgument<T>(T argument) {
-    for (final slot in List.of(_slots, growable: false)) {
+  ReturnType callSlotsWithArgument<T>(T argument) {
+    ReturnType returnValue = _noMismatch;
+    var length = _slots.length;
+    iterating = true;
+    for (index = 0; index < length; index++) {
+      final slot = _slots.elementAtOrNull(index);
+      if (slot == null) break;
       try {
         slot(argument);
+        _adjustIndex();
       } on Error {
         try {
           slot(); // In case the user chose to ignore the argument. Signal passes an argument but this particular slot doesn't need it.
+          _adjustIndex();
         } on NoSuchMethodError {
-          return (signatureMismatchedForSomeSlots: false, slot: slot);
+          returnValue = (signatureMismatchedForSomeSlots: false, slot: slot);
+          break;
         }
       }
     }
-    return _noMismatch;
+    index = 0;
+    iterating = false;
+    return returnValue;
   }
 
-  ({bool signatureMismatchedForSomeSlots, Function? slot}) _misMatched(
-      Function slot) =>
+   void _adjustIndex() {
+     index -= indexCorrection;
+     indexCorrection = 0;
+  }
+
+  ReturnType _misMatched(Function slot) =>
       (signatureMismatchedForSomeSlots: true, slot: slot);
 
   // --------------------------------------------------------------- //
 
-  final LinkedHashSet<Function> _slots = LinkedHashSet();
+  final _slots = <Function>[];
+
+  var indexCorrection = 0;
+  var index = 0;
+  bool iterating = false;
 
   static const _noMismatch =
-  (signatureMismatchedForSomeSlots: false, slot: null);
+      (signatureMismatchedForSomeSlots: false, slot: null);
 }
