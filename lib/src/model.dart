@@ -21,7 +21,7 @@ abstract class Model {
   /// Returns the value and also connects the signal to any [Watcher]
   /// that accessed this value.
   @protected
-  T getter<T extends Object>(T value, Signal signal) {
+  T bind<T extends Object>(T value, Signal signal) {
     return SubscriptionManager.connectToSubscribersOf(value, signal);
   }
 }

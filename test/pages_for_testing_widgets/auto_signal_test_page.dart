@@ -10,14 +10,14 @@ class AutoSignalModel extends Model {
   int _anotherCount = 0;
   final anotherCountChanged = Signal();
 
-  int get count => getter(_count, countChanged);
+  int get count => bind(_count, countChanged);
   set count(int count) {
     if (_count == count) return;
     _count = count;
     countChanged();
   }
 
-  int get anotherCount => getter(_anotherCount, anotherCountChanged);
+  int get anotherCount => bind(_anotherCount, anotherCountChanged);
   set anotherCount(int anotherCount) {
     if (_anotherCount == anotherCount) return;
     _anotherCount = anotherCount;
