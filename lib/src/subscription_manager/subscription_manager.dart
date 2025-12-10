@@ -1,11 +1,11 @@
 import 'dart:ui';
 import '../../signal.dart';
 
-
 abstract class SubscriptionManager {
   static VoidCallback? _activeSubscription;
 
   static void initiateSubscription(VoidCallback subscription) {
+    if (_activeSubscription != null) return;
     _activeSubscription = subscription;
   }
 

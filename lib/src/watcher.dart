@@ -148,10 +148,13 @@ class _WatcherState extends State<Watcher> {
     }
 
     SubscriptionManager.initiateSubscription(_rebuild);
-    final watchedWidget = widget.watch(context);
-    SubscriptionManager.finalizeSubscription();
-
-    subscribed = true;
+    late final Widget watchedWidget;
+    try {
+      watchedWidget = widget.watch(context);
+    } finally {
+      SubscriptionManager.finalizeSubscription();
+      subscribed = true;
+    }
     return watchedWidget;
   }
 
