@@ -105,8 +105,40 @@ class _WatcherState extends State<Watcher> {
 
   @override
   void activate() {
-    widget.onActivate?.call();
     super.activate();
+    widget.onActivate?.call();
+  }
+
+  @override
+  void didUpdateWidget(covariant Watcher oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final newWidget = widget;
+
+    final oldSignals = _signals(oldWidget);
+    final newSignals = _signals(newWidget);
+    final oldProperties = _properties(oldWidget);
+    final newProperties = _properties(newWidget);
+
+    final staleSignals = oldSignals.difference(newSignals);
+    final addedSignals = newSignals.difference(oldSignals);
+    final staleProperties = oldProperties.difference(newProperties);
+    final addedProperties = newProperties.difference(oldProperties);
+
+    for (final signal in staleSignals) {
+      signal.disconnect(_rebuild);
+    }
+
+    for(final signal in addedSignals) {
+      signal.connect(_rebuild);
+    }
+
+    for(final property in staleProperties) {
+      property.changed.disconnect(_rebuild);
+    }
+
+    for (final property in addedProperties) {
+      property.changed.connect(_rebuild);
+    }
   }
 
   @override
@@ -154,7 +186,8 @@ class _WatcherState extends State<Watcher> {
     }
   }
 
-  Set<Property> _properties() {
+  Set<Property> _properties([Watcher? targetWidget]) {
+    final widget = targetWidget ?? this.widget;
     final properties = widget.properties ?? {};
     if (widget.property != null) {
       properties.add(widget.property!);
@@ -162,7 +195,8 @@ class _WatcherState extends State<Watcher> {
     return properties;
   }
 
-  Set<Signal> _signals() {
+  Set<Signal> _signals([Watcher? targetWidget]) {
+    final widget = targetWidget ?? this.widget;
     final signals = widget.signals ?? {};
     if (widget.signal != null) {
       signals.add(widget.signal!);
