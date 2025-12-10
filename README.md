@@ -2,7 +2,16 @@
 Frost is a lightweight, highly performant, and signal-based state management solution for Flutter. 
 It decouples your business logic from your UI using **Signals**, **Properties**, and a **Store** for
 dependency injection.
-Focus on your logic, not on how to propagate state changes.
+With Frost focus on your logic, not on how to propagate state changes.
+
+
+## Why Frost?
+- **True decoupling** - Events flow without any component knowing about others
+- **Zero boilerplate** - One line creates reactive state, one widget consumes it
+- **Automatic tracking** - No manual subscriptions or registrations
+- **Blazing fast** - Only rebuilds exactly what changed
+- **Pure business logic** - Write testable Dart code with zero Flutter dependencies
+- **Intuitive API** - If you can write Dart, you already know Frost
 
 ## Installation
 
@@ -41,6 +50,7 @@ flutter pub add frost
 <summary><strong>Tips & Tricks</strong></summary>
 
 - [Conditional Rebuilding](#conditional-rebuilding)
+- [Manual Property and Signal Connection](#manual-property-and-signal-connection)
 - [Custom Reactive Getters](#custom-reactive-getters)
 - [Widget Init and Dispose](#widget-init-and-dispose)
 - [Handling Lists and Collections](#handling-lists-and-collections)
@@ -49,55 +59,37 @@ flutter pub add frost
 </details>
 
 <details>
-<summary><strong>Detailed Explanation: Signals & Slots</strong></summary>
+<summary><strong>Deep Dive: Signals & Slots</strong></summary>
 
+- [What are they?](#what-are-they)
 - [How it works](#how-it-works)
-- [Passing Arguments](#passing-arguments)
-- [Disconnection](#disconnection)
+- [Passing Data](#passing-data)
+- [Connection & Disconnection](#connection--disconnection)
+- [Why use this?](#why-use-this)
 
 </details>
-
-
 
 ## Quick Start: The Counter App
 
 The easiest way to use Frost is with Properties and the Watcher widget.
 
 ```dart
-import 'package:flutter/material.dart';
 import 'package:frost/frost.dart';
 
-// 1. Create a Property (can be global or inside a class)
 final count = 0.property;
 
-void main() {
-  runApp(const MaterialApp(home: CounterApp()));
-}
-
-class CounterApp extends StatelessWidget {
-  const CounterApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        // 2. Update the value. The UI updates automatically.
-        onPressed: () => count.value++, 
-        child: const Icon(Icons.add),
-      ),
-      // 3. Use Watcher to listen to changes
-      body: Center(
-        child: Watcher(
-          watch: (context) => Text(
-            'Count: ${count.value}', // Accessing .value automatically registers the listener
-            style: const TextStyle(fontSize: 30),
-          ),
-        ),
-      ),
-    );
-  }
-}
+// Anywhere in your app:
+Watcher(
+watch: (context) => Text('Count: ${count.value}'),
+)
 ```
+Update it from anywhere.
+
+```
+count.value++; // UI updates automatically
+
+```
+
 
 ## Core Concepts
 
@@ -194,6 +186,8 @@ class MailService extends Model { //models will be explained shortly.
 > Do not place signals and properties inside stateless widgets.
 > Instead use a private global variable or the store.
 > They do not work if placed inside stateless widgets.
+> Do not use async functions as slots. They will not be awaited.
+> Instead connect a sync slot and emit the signal after async function completes.
 
 ## Architecture: The Store
 
@@ -211,7 +205,7 @@ class AuthModel extends Model {
 
   void login() {
     // logic...
-    user.name = loggedInUser;
+    user.value.name = loggedInUser;
     userLoggedIn();
   }
 }
@@ -226,9 +220,8 @@ class MailService extends Model {
 ### Register the Model
 
 Add your models to the Store when your app starts. Models can be added in two ways.
-
-    Lazy: Created only when first accessed.
-    Eager: Created immediately.
+* Lazy: created when first accessed
+* eager: created as soon as they are added.
 
 ```dart
 void main() {
@@ -255,7 +248,7 @@ Watcher(
 ```
 
 OnInit and onDispose are best used for acquiring and releasing resources relevant to the widget.
-```
+```dart
 final _controller = TextEditingController();
 Watcher(
     onInit: () => _controller.addListener(myListener),
@@ -298,21 +291,36 @@ Watcher(
     },
 )
 ```
+### Manual Property and Signal Connection
+You can connect to properties that aren't accessed inside watcher by manually supplying
+them to the *signal* argument of the Watcher. Use *signals* argument to provide more than
+one properties. Similarly you can connect to more than one signals using *signals* argument.
+```dart
+Watcher(
+  signal: someSignal,
+  signals: {signal1, signal2},
+  property: someProperty,
+  properties: {property1, property2},
+  watch: () => SomeWidget(...),
+),
+```
+
 ### Custom Reactive Getters
 
 If you are building a custom Model and want to create your own 
-reactive variables (without using the Property wrapper), you can use the getter() method. 
+reactive variables (without using the Property wrapper), you can use the bind() method. 
 This connects a private value and a signal to the Watcher's auto-subscription system.
 This is for working more naturally inside model with data but the data should still be 
 exposed like a property. 
 
-```
+```dart
 class CounterModel extends Model {
     final _changeSignal = Signal();
     int _internalCount = 0;
     
-    // Use getter() to register the dependency automatically
-    int get count => getter(_internalCount, _changeSignal);
+    // Use bind() to associate _changeSignal with _internalCount automatically when
+    // count is accessed inside watcher.
+    int get count => bind(_internalCount, _changeSignal);
     
     void increment() {
         _internalCount++;
@@ -363,57 +371,67 @@ methods. Don't forget to pass the id when getting that model or performing any o
   Store.add(MyEagerModel(), 'myId');
 ```
 
-## Detailed Explanation: Signals & Slots
+## Deep dive: Signals & Slots
+Under the hood, Frost uses the Signal and Slot pattern. Understanding this
+helps you realize why Frost is so decoupled.
 
-Frost relies on the Signal and Slot pattern. This is a mechanism for communication between two entities.
+### What are they?
 
-What are they?
+Think of a Signal as a radio station and a Slot as a radio receiver.
 
-    Signal (The Emitter): Think of this as a radio station. It broadcasts an event. It doesn't care who is listening.
+    Signal (The Emitter): Something that says "Hey, this event happened!" (e.g., buttonClicked, dataLoaded, valueChanged).
 
-    Slot (The Listener): Think of this as a radio receiver. It connects to the signal to hear what's happening.
+    Slot (The Listener): A standard function that reacts to that event.
 
-## How it works
+### How it works
 
-Unlike other patterns where the Emitter manages a list of listeners (like ChangeNotifier), Signals are independent events.
+Unlike other patterns where the Emitter knows about the Listener (e.g., addListener), 
+in Frost, the Signal simply broadcasts. It doesn't care who is listening.
 
-```dart
-// 1. Create a Signal
-final onDataLoaded = Signal();
+``` dart
+// 1. Create a Signal (The Radio Station)
+final onUserLoggedOut = Signal();
 
-// 2. Define a Slot (just a void function)
-void handleData() {
-  print("Data is here!");
+// 2. Define a Slot (The Listener Function)
+Slot performCleanup() {
+print("Cleaning up user data...");
 }
 
-// 3. Connect
-onDataLoaded.connect(handleData);
+// 3. Connect them
+onUserLoggedOut.connect(performCleanup);
 
-// 4. Emit
-onDataLoaded(); // Prints: "Data is here!"
+// 4. Emit the signal
+onUserLoggedOut(); // Prints: "Cleaning up user data..."
 ```
 
-### Passing Arguments
+### Passing Data
 
-Signals can carry data.
-```dart
-final onError = Signal();
+Signals can carry data payload.
+```
+// Signal that carries a String
+final onMessageReceived = Signal();
 
-void showAlert(String message) {
-  print("Error: $message");
+// Slot that accepts a String
+void showNotification(String message) {
+print("New message: $message");
 }
 
-onError.connect(showAlert);
+onMessageReceived.connect(showNotification);
 
 // Emit with data
-onError("Network Failed");
+onMessageReceived("Hello World");
 ```
 
-### Disconnection
+### Connection & Disconnection
 
-Always disconnect slots when they are no longer needed to prevent memory leaks. The Watcher widget 
-handles this automatically for you when you consume data bound to some signal, but if you use connect
-manually, you must also use disconnect.
-```dart
-onError.disconnect(showAlert);
+You must disconnect slots when they are no longer needed to prevent memory leaks.
+
 ```
+onMessageReceived.disconnect(showNotification);
+```
+
+### Why use this?
+
+This pattern allows your Business Logic (Models) to simply emit 
+signals ("I changed!", "Error occurred!") without knowing anything about the UI (Widgets). 
+The UI simply connects to the signals it cares about.
