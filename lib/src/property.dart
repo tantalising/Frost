@@ -1,5 +1,5 @@
-import 'package:frost/src/subscription_manager/subscription_manager.dart';
 import 'signal.dart';
+import 'subscription_manager/subscription_manager.dart';
 
 /// Class implementing property functionality.
 /// A property is a combination of a value and a signal.
