@@ -27,22 +27,18 @@ typedef ModelBuilder<T extends Model> = T Function();
 abstract class Store {
   /// Adds a model to the Store.
   /// No model is added if a model of same type already exists.
-  /// Model is added lazily that is no model is created until it is
+  /// Model is added lazily unless [lazy] is false that is no model is created until it is
   /// accessed for the first time.
   /// To add a model when another one of same type already exists, provide
   /// a unique string id using the optional [id] parameter.
   static void add<T extends Model>(ModelBuilder<T> modelBuilder,
-      [String? id]) {
+      {String? id, bool lazy = true}) {
     final key = id ?? T;
-    _LazyModelStore.add(modelBuilder, key);
-  }
-
-  /// Adds the model to the store immediately instead of lazily like [Store.add]
-  /// Provide a unique string id to the optional [id] parameter to add more than one
-  /// instance of same model.
-  static void addEager<T extends Model>(T model, [String? id]) {
-    final key = id ?? T;
-    _EagerModelStore.add(model, key);
+    if (lazy) {
+      _LazyModelStore.add(modelBuilder, key);
+    } else {
+      _EagerModelStore.add(modelBuilder(), key);
+    }
   }
 
   /// Removes the model of given type from the store and returns it.
@@ -73,8 +69,7 @@ abstract class Store {
   /// an entire model.
   /// Use the [id] parameter to replace an instance of id model.
   /// See [Store.add] for details.
-  static void replace<T extends Model>(ModelBuilder<T> builder,
-      [String? id]) {
+  static void replace<T extends Model>(ModelBuilder<T> builder, [String? id]) {
     final key = id ?? T;
     _LazyModelStore.replace(builder, key);
     _EagerModelStore.replace(builder(), key);
@@ -89,10 +84,9 @@ abstract class Store {
 
 abstract class _LazyModelStore {
   static final _modelBuilderRepository =
-  _TwoKeyTypeMap<Type, String, ModelBuilder>();
+      _TwoKeyTypeMap<Type, String, ModelBuilder>();
 
-  static void add<T extends Model>(
-      ModelBuilder<T> modelBuilder, Object key) {
+  static void add<T extends Model>(ModelBuilder<T> modelBuilder, Object key) {
     _modelBuilderRepository[key] = modelBuilder;
   }
 
@@ -110,8 +104,7 @@ abstract class _LazyModelStore {
     return model;
   }
 
-  static void replace<T extends Model>(
-      ModelBuilder<T> builder, Object key) {
+  static void replace<T extends Model>(ModelBuilder<T> builder, Object key) {
     _modelBuilderRepository.remove(key);
     _modelBuilderRepository[key] = builder;
   }
