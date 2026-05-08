@@ -1,11 +1,15 @@
+<p align="center">
+  <img src="assets/banner.jpg" width="100%" alt="Frost Banner" />
+</p>
+
 # Frost
+
 Frost is a lightweight, highly performant, and signal-based state management solution for Flutter. 
-It decouples your business logic from your UI using **Signals**, **Properties**, and a **Store** for
-dependency injection.
+It decouples your business logic from your UI using **Signals**, **Properties**, and a **Store** for dependency injection.
 With Frost focus on your logic, not on how to propagate state changes.
 
-
 ## Why Frost?
+
 - **True decoupling** - Events flow without any component knowing about others
 - **Zero boilerplate** - One line creates reactive state, one widget consumes it
 - **Automatic tracking** - No manual subscriptions or registrations
@@ -18,6 +22,7 @@ With Frost focus on your logic, not on how to propagate state changes.
 ```bash
 flutter pub add frost
 ```
+
 ## Index
 
 <details>
@@ -83,20 +88,18 @@ Watcher(
 watch: (context) => Text('Count: ${count.value}'),
 )
 ```
+
 Update it from anywhere.
 
 ```
 count.value++; // UI updates automatically
-
 ```
-
 
 ## Core Concepts
 
 ### Properties
 
-A Property is a wrapper around a value that notifies listeners when it changes. You can create one 
-from any variable using the .property extension.
+A Property is a wrapper around a value that notifies listeners when it changes. You can create one from any variable using the .property extension.
 
 ```dart
 final name = "Frost".property;
@@ -135,8 +138,10 @@ Watcher(
 
 ### Signals
 
-Signals are the underlying event mechanism of Frost. Use them when you want to broadcast an event 
-that isn't necessarily a state change (like navigating to a new page or showing a Toast).
+<p align="center">
+  <img src="assets/signal.jpg" width="100%" alt="Signal and Slot" />
+</p>
+Signals are the underlying event mechanism of Frost. Use them when you want to broadcast an event that isn't necessarily a state change (like navigating to a new page or showing a Toast).
 
 ```dart
 // Define a signal
@@ -154,28 +159,27 @@ Watcher(
   watch: (context) => const Text("Logged in!"),
 )
 ```
-You can also connect signals to slots manually in constructor, init or any other suitable place 
-depending on your need. For example, if you need to remove spam mails on request you can connect the
-appropriate signal in your MailService.
+
+You can also connect signals to slots manually in constructor, init or any other suitable place depending on your need. For example, if you need to remove spam mails on request you can connect the appropriate signal in your MailService.
 
 ```dart
 class MailService extends Model { //models will be explained shortly.
   final spamRemovalRequested = Signal();
-  
+
   @override
   init() {
     connect(spamRemovalRequested, removeSpams);
     // or like this. Don't do both. They are redundant.
     spamRemovalRequested.connect(removeSpams);
   }
-  
+
   @override
   dispose() {
     disconnect(spamRemovalRequested, removeSpams);
     // or like this
     spamRemovalRequested.disconnect(removeSpams);
   }
-  
+
   Slot removeSpams() {
     // remove spams.
   }
@@ -191,8 +195,7 @@ class MailService extends Model { //models will be explained shortly.
 
 ## Architecture: The Store
 
-For larger apps, you shouldn't keep variables globally. Frost provides a Store to manage your Models
-and Dependencies (Service Locator pattern).
+For larger apps, you shouldn't keep variables globally. Frost provides a Store to manage your Models and Dependencies (Service Locator pattern).
 
 ### Define a Model
 
@@ -220,6 +223,7 @@ class MailService extends Model {
 ### Register the Model
 
 Add your models to the Store when your app starts. Models can be added in two ways.
+
 * Lazy: created when first accessed
 * eager: created as soon as they are added.
 
@@ -227,20 +231,22 @@ Add your models to the Store when your app starts. Models can be added in two wa
 void main() {
   // Lazy (Recommended)
   Store.add(() => AuthModel());
-  
+
   // Eager
-  Store.addEager(MailSerivce());
+  Store.add(()=>MailSerivce(), lazy:false);
 
   runApp(const MyApp());
 }
 ```
 
 ### Access the Model
+
 Retrieve the model anywhere in your app.
 
 ```dart
 Watcher(
   watch: (context) => Text('user name is ${Store.get<AuthModel>().user().name}'),
+
   // mail will be sent automatically upon login after the signal is connected with the slot.
   onInit: () => connect(Store.get<AuthModel>().userLoggedIn, Store.get<MailService>().sendLoginMail)
   onDispose: () => disconnect(Store.get<AuthModel>().userLoggedIn, Store.get<MailService>().sendLoginMail)
@@ -248,6 +254,7 @@ Watcher(
 ```
 
 OnInit and onDispose are best used for acquiring and releasing resources relevant to the widget.
+
 ```dart
 final _controller = TextEditingController();
 Watcher(
@@ -264,8 +271,8 @@ Watcher(
 
 ### Pro Tip: Model Accessors
 
-Add a static getter to your model for cleaner code when you are sure that the returned model can't 
-be null.
+Add a static getter to your model for cleaner code when you are sure that the returned model can't be null.
+
 ```dart
 class AuthModel extends Model {
   static AuthModel get get => Store.get<AuthModel>()!;
@@ -277,10 +284,10 @@ AuthModel.get.login();
 ```
 
 ## Tips & Tricks
+
 ### Conditional Rebuilding
 
-Sometimes you want a widget to rebuild only if a certain condition is met, even if the properties 
-it watches have changed. Use the when parameter to control this.
+Sometimes you want a widget to rebuild only if a certain condition is met, even if the properties it watches have changed. Use the when parameter to control this.
 
 ```dart
 Watcher(
@@ -291,10 +298,11 @@ Watcher(
     },
 )
 ```
+
 ### Manual Property and Signal Connection
-You can connect to properties that aren't accessed inside watcher by manually supplying
-them to the *signal* argument of the Watcher. Use *signals* argument to provide more than
-one properties. Similarly you can connect to more than one signals using *signals* argument.
+
+You can connect to properties that aren't accessed inside watcher by manually supplying them to the *signal* argument of the Watcher. Use *signals* argument to provide more than one properties. Similarly you can connect to more than one signals using *signals* argument.
+
 ```dart
 Watcher(
   signal: someSignal,
@@ -310,18 +318,17 @@ Watcher(
 If you are building a custom Model and want to create your own 
 reactive variables (without using the Property wrapper), you can use the bind() method. 
 This connects a private value and a signal to the Watcher's auto-subscription system.
-This is for working more naturally inside model with data but the data should still be 
-exposed like a property. 
+This is for working more naturally inside model with data but the data should still be exposed like a property. 
 
 ```dart
 class CounterModel extends Model {
     final _changeSignal = Signal();
     int _internalCount = 0;
-    
+
     // Use bind() to associate _changeSignal with _internalCount automatically when
     // count is accessed inside watcher.
     int get count => bind(_internalCount, _changeSignal);
-    
+
     void increment() {
         _internalCount++;
         _changeSignal(); // Watcher will detect this change without needing to provide the signal.
@@ -349,8 +356,7 @@ Watcher(
 
 ### Handling Lists and Collections
 
-When using List, Set, or Map inside a Property, simply modifying the list won't trigger an update 
-because the list reference itself didn't change. Use .update():
+When using List, Set, or Map inside a Property, simply modifying the list won't trigger an update. Use .update():
 
 ```dart
 final items = <String>[].property;
@@ -362,16 +368,17 @@ items.update((list) {
 ```
 
 ### Multiple Models of Same Type
+
 The model store won't add a model if another model of same type already exists. To add(or get etc) model of
-same type, you can use the same methods of Store. Just pass an additional unique string id to the
-methods. Don't forget to pass the id when getting that model or performing any other operation on that model.
+same type, you can use the same methods of Store. Just pass an additional unique string id to the methods. Don't forget to pass the id when getting that model or performing any other operation on that model.
 
 ```dart
-  Store.add(MyEagerModel());
-  Store.add(MyEagerModel(), 'myId');
+  Store.add(()=>MyModel());
+  Store.add(()=>MyModel(), id:'myId');
 ```
 
 ## Deep dive: Signals & Slots
+
 Under the hood, Frost uses the Signal and Slot pattern. Understanding this
 helps you realize why Frost is so decoupled.
 
@@ -380,7 +387,7 @@ helps you realize why Frost is so decoupled.
 Think of a Signal as a radio station and a Slot as a radio receiver.
 
     Signal (The Emitter): Something that says "Hey, this event happened!" (e.g., buttonClicked, dataLoaded, valueChanged).
-
+    
     Slot (The Listener): A standard function that reacts to that event.
 
 ### How it works
@@ -388,7 +395,7 @@ Think of a Signal as a radio station and a Slot as a radio receiver.
 Unlike other patterns where the Emitter knows about the Listener (e.g., addListener), 
 in Frost, the Signal simply broadcasts. It doesn't care who is listening.
 
-``` dart
+```dart
 // 1. Create a Signal (The Radio Station)
 final onUserLoggedOut = Signal();
 
@@ -407,6 +414,7 @@ onUserLoggedOut(); // Prints: "Cleaning up user data..."
 ### Passing Data
 
 Signals can carry data payload.
+
 ```
 // Signal that carries a String
 final onMessageReceived = Signal();
@@ -433,5 +441,4 @@ onMessageReceived.disconnect(showNotification);
 ### Why use this?
 
 This pattern allows your Business Logic (Models) to simply emit 
-signals ("I changed!", "Error occurred!") without knowing anything about the UI (Widgets). 
-The UI simply connects to the signals it cares about.
+signals ("I changed!", "Error occurred!") without knowing anything about the UI (Widgets). The UI simply connects to the signals it cares about.
