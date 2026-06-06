@@ -1,10 +1,10 @@
 name: frost
-description: "State management solution that decouples business logic from UI effortlessly. 
-Frost uses reactive Properties, intelligent Watchers, and Signals
-to manage state with minimal boilerplate and high performance."
-
+description: >
+  State management solution that decouples business logic from UI effortlessly. 
+  Frost uses reactive Properties, Watchers, and Signals with minimal boilerplate.
 version: 2.0.0
-homepage: "https://github.com/tantalising/frost"
+homepage: https://github.com/tantalising/frost
+repository: https://github.com/tantalising/frost
 
 environment:
   sdk: '>=3.3.4 <4.0.0'

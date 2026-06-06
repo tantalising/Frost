@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/banner.jpg" width="100%" alt="Frost Banner" />
+  <img src="https://github.com/tantalising/Frost/blob/master/assets/banner.jpg" width="100%" alt="Frost Banner" />
 </p>
 
 # Frost
@@ -7,6 +7,12 @@
 Frost is a lightweight, highly performant, and signal-based state management solution for Flutter. 
 It decouples your business logic from your UI using **Signals**, **Properties**, and a **Store** for dependency injection.
 With Frost focus on your logic, not on how to propagate state changes.
+
+<p align="center">
+  <a href="https://github.com/user-attachments/assets/352aaa95-c637-4376-99c9-0f6532029784" target="_blank">
+    <img src="assets/intro.png" width="100%" alt="Click to watch the Frost Banner Intro" />
+  </a>
+</p>
 
 ## Why Frost?
 
@@ -225,7 +231,7 @@ class MailService extends Model {
 Add your models to the Store when your app starts. Models can be added in two ways.
 
 * Lazy: created when first accessed
-* eager: created as soon as they are added.
+* Eager: created as soon as they are added.
 
 ```dart
 void main() {
@@ -415,7 +421,7 @@ onUserLoggedOut(); // Prints: "Cleaning up user data..."
 
 Signals can carry data payload.
 
-```
+```dart
 // Signal that carries a String
 final onMessageReceived = Signal();
 
@@ -434,7 +440,7 @@ onMessageReceived("Hello World");
 
 You must disconnect slots when they are no longer needed to prevent memory leaks.
 
-```
+```dart
 onMessageReceived.disconnect(showNotification);
 ```
 
